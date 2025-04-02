@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/workspaces/Chess-Engine/include/board_utils.h
+stdint.h
+-
+
+/workspaces/Chess-Engine/include/defs.h
+stdint.h
+-
+string.h
+-
+
+/workspaces/Chess-Engine/main.c
+include/defs.h
+/workspaces/Chess-Engine/include/defs.h
+include/board_utils.h
+/workspaces/Chess-Engine/include/board_utils.h
+stdio.h
+-
+string.h
+-
+

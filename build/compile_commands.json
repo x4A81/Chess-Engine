@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/main.c.o   -c /workspaces/Chess-Engine/main.c",
+  "file": "/workspaces/Chess-Engine/main.c"
+},
+{
+  "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/board_utils.c.o   -c /workspaces/Chess-Engine/board_utils.c",
+  "file": "/workspaces/Chess-Engine/board_utils.c"
+}
+]
