@@ -6,6 +6,16 @@
 
 #IncludeRegexTransform: 
 
+/workspaces/Chess-Engine/board_utils.c
+include/board_utils.h
+/workspaces/Chess-Engine/include/board_utils.h
+include/defs.h
+/workspaces/Chess-Engine/include/defs.h
+stdio.h
+-
+string.h
+-
+
 /workspaces/Chess-Engine/include/board_utils.h
 stdint.h
 -
@@ -14,13 +24,5 @@ stdint.h
 stdint.h
 -
 string.h
--
-
-/workspaces/Chess-Engine/main.c
-include/defs.h
-/workspaces/Chess-Engine/include/defs.h
-include/board_utils.h
-/workspaces/Chess-Engine/include/board_utils.h
-stdio.h
 -
 

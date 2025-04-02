@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#define START_POS "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
 // Little Endian Rank-File Mapping
 typedef enum SQUARES {
     a1, b1, c1, d1, e1, f1, g1, h1,
@@ -13,7 +15,7 @@ typedef enum SQUARES {
     a5, b5, c5, d5, e5, f5, g5, h5,
     a6, b6, c6, d6, e6, f6, g6, h6,
     a7, b7, c7, d7, e7, f7, g7, h7,
-    a8, b8, c8, d8, e8, f8, g8, h8, no_sq
+    a8, b8, c8, d8, e8, f8, g8, h8
 } SQUARES;
 
 typedef enum PIECES {
@@ -27,11 +29,22 @@ typedef enum COLOURS {
 typedef struct BOARDS_T {
     __uint64_t bitboards[15];
     int side;
-    int castling_rights;
-    int enpassant_sq;
+    int castling;
+    int enpassant;
+    int halfmove;
+    int fullmove;
 } BOARDS_T;
 
 #define CLEAR_ALL_BITBOARDS() (memset(board.bitboards, 0ULL, 120))
+#define RESET_BOARD() do { \
+    CLEAR_ALL_BITBOARDS(); \
+    board.side = -1; \
+    board.castling = 0; \
+    board.enpassant = -1; \
+    board.halfmove = 0; \
+    board.fullmove = 1; \
+} while (0)
+
 
 extern BOARDS_T board;
 

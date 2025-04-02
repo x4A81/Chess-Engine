@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define SET_BITBOARD(bb, sq) (bb | (1ULL << sq))
+#define SET_BIT(bb, sq) (bb |= (1ULL << sq))
 #define GET_BIT(bb, sq) (bb & (1ULL << sq))
 
 void print_board();
