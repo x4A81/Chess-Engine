@@ -23,6 +23,4 @@ include/board_utils.h
 /workspaces/Chess-Engine/include/board_utils.h
 stdio.h
 -
-string.h
--
 
