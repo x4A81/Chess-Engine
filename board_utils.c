@@ -6,9 +6,9 @@
 void print_board() {
     char *piece_chars = "pnbrqkPNBRQK";
     printf("--------------------------------------------\n");
-    for (int r = 7; r >= 0; r--) {
+    for (int r = 0; r < 8; r++) {
         for (int i = 0; i < 3; i++) {
-            if (i==1) printf("%d ", r+1);
+            if (i==1) printf("%d ", 8-r);
             else printf("| ");
             for (int f = 0; f < 8; f++) {
                 char piece_char = ((r+f)%2 == 0) ? ' ' : '#';
@@ -33,16 +33,21 @@ void print_board() {
             printf("\n");
         }
     }
+
     printf("----a----b----c----d----e----f----g----h----\n");
+    printf("Side To move: %s\n", (board.side == white) ? "white" : "black");
+    printf("Castling: %d\n", board.castling);
+    printf("Enpassant square: %s\n", " ");
+    printf("Halfmove Clock: %d\n", board.halfmove);
+    printf("Full moves: %d\n", board.fullmove);
 }
 
 void print_bitboard(uint64_t bb) {
-    int r, f, sq;
     printf("\nBitboard val: %lu \n", bb);
-    for (r = 7; r >= 0; r--) {
-      printf(" %d |", r + 1);
-      for (f = 0; f < 8; f++) {
-        sq = 8*r+f;
+    for (int r = 0; r < 8; r++) {
+      printf(" %d |", 8-r);
+      for (int f = 0; f < 8; f++) {
+        int sq = 8*r+f;
         printf(" %d ", GET_BIT(bb, sq) ? 1 : 0);
       }
   
@@ -54,9 +59,10 @@ void print_bitboard(uint64_t bb) {
 
 void setup_board(char *fen) {
     int char_to_piece[] = {
-        ['P'] = 0, ['N'] = 1, ['B'] = 2, ['R'] = 3, ['Q'] = 4, ['K'] = 5,
-        ['p'] = 6, ['n'] = 7, ['b'] = 8, ['r'] = 9, ['q'] = 10, ['k'] = 11};
+        ['p'] = 0, ['n'] = 1, ['b'] = 2, ['r'] = 3, ['q'] = 4, ['k'] = 5,
+        ['P'] = 6, ['N'] = 7, ['B'] = 8, ['R'] = 9, ['Q'] = 10, ['K'] = 11};
     RESET_BOARD();
+
     for (int r = 0; r < 8; r++) {
         for (int f = 0; f < 8; f++) {
             int sq = 8*r+f;
@@ -64,25 +70,69 @@ void setup_board(char *fen) {
                 int piece = char_to_piece[*fen];
                 SET_BIT(board.bitboards[piece], sq);
                 *fen++;
-              }
-        
-              if (*fen >= '0' && *fen <= '9') {
+            } else if (*fen >= '1' && *fen <= '8') {
                 int offset = *fen - '0', piece = -1;
                 for (int bb = 0; bb <= 12; bb++) {
-                  if (GET_BIT(board.bitboards[bb], sq)) {
-                    piece = bb;
-                    break;
-                  }
+                    if (GET_BIT(board.bitboards[bb], sq)) {
+                        piece = bb;
+                        break;
+                    }
                 }
-        
+    
                 if (piece == -1) 
                     f--;
+
                 f += offset;
                 *fen++;
-              }
-        
-              if (*fen == '/') 
+            }
+            
+            if (*fen == '/') 
                 *fen++;
         }
     }
+
+    *fen++;
+    board.side = (*fen == 'w') ? white : black;
+    
+    fen += 2;
+    while (*fen != ' ') {
+        switch (*fen) {
+        case 'K':
+        board.castling |= 1; break;
+        case 'Q':
+        board.castling |= 2; break;
+        case 'k':
+        board.castling |= 4; break;
+        case 'q':
+        board.castling |= 8; break;
+        default:
+        break;
+        }
+
+    *fen++;
+  }
+
+  *fen++;
+  if (*fen != '-') {
+    int f = fen[0] - 'a', r = 8 - (fen[1] - '0');
+    board.enpassant = 8*r+f;
+    *fen++;
+  }
+
+  *(fen += 2);
+  if (*fen != '\0') {
+    board.halfmove = 0;
+    while (*fen != ' ') {
+      board.halfmove = board.halfmove * 10 + (fen[0] - '0');
+      *fen++;
+    }
+
+    *fen++;
+
+    board.fullmove = 0;
+    while (*fen != ' ' && *fen != '\0') {
+      board.fullmove = board.fullmove * 10 + (fen[0] - '0');
+      *fen++;
+    }
+  }
 }
