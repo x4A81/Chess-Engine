@@ -35,6 +35,10 @@ typedef struct BOARDS_T {
     int fullmove;
 } BOARDS_T;
 
+typedef enum CASTLING_RIGHTS {
+    wkingside = 1, wqueenside, bkingside = 4, bqueenside = 8
+} CASTLING_RIGHTS;
+
 #define CLEAR_ALL_BITBOARDS() (memset(board.bitboards, 0ULL, 120))
 #define RESET_BOARD() do { \
     CLEAR_ALL_BITBOARDS(); \
