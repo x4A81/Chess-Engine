@@ -31,4 +31,10 @@ typedef enum MOVE_TYPES {
     knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
 } MOVE_TYPES;
 
+void generate_moves(int side);
+void make_move(MOVES_T move);
+void generate_pawn_moves(int side);
+
+
+
 #endif

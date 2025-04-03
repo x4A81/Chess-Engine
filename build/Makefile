@@ -123,32 +123,32 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
-board_utils.o: board_utils.c.o
+board.o: board.c.o
 
-.PHONY : board_utils.o
+.PHONY : board.o
 
 # target to build an object file
-board_utils.c.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board_utils.c.o
-.PHONY : board_utils.c.o
+board.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.o
+.PHONY : board.c.o
 
-board_utils.i: board_utils.c.i
+board.i: board.c.i
 
-.PHONY : board_utils.i
+.PHONY : board.i
 
 # target to preprocess a source file
-board_utils.c.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board_utils.c.i
-.PHONY : board_utils.c.i
+board.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.i
+.PHONY : board.c.i
 
-board_utils.s: board_utils.c.s
+board.s: board.c.s
 
-.PHONY : board_utils.s
+.PHONY : board.s
 
 # target to generate assembly for a file
-board_utils.c.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board_utils.c.s
-.PHONY : board_utils.c.s
+board.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.s
+.PHONY : board.c.s
 
 main.o: main.c.o
 
@@ -186,9 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... main"
-	@echo "... board_utils.o"
-	@echo "... board_utils.i"
-	@echo "... board_utils.s"
+	@echo "... board.o"
+	@echo "... board.i"
+	@echo "... board.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

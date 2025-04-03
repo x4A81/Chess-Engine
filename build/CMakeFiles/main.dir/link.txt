@@ -1,1 +1,1 @@
-/usr/bin/gcc -g   CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/board_utils.c.o  -o main 
+/usr/bin/gcc -g   CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/board.c.o  -o main 

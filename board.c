@@ -1,7 +1,5 @@
-#include "include/board_utils.h"
-#include "include/defs.h"
+#include "include/board.h"
 #include <stdio.h>
-#include <string.h>
 
 void print_board() {
     char *piece_chars = "pnbrqkPNBRQK";
@@ -98,13 +96,13 @@ void setup_board(char *fen) {
     while (*fen != ' ') {
         switch (*fen) {
         case 'K':
-        board.castling |= 1; break;
+        board.castling |= wkingside; break;
         case 'Q':
-        board.castling |= 2; break;
+        board.castling |= wqueenside; break;
         case 'k':
-        board.castling |= 4; break;
+        board.castling |= bkingside; break;
         case 'q':
-        board.castling |= 8; break;
+        board.castling |= bqueenside; break;
         default:
         break;
         }

@@ -1,5 +1,4 @@
-#include "include/defs.h"
-#include "include/board_utils.h"
+#include "include/board.h"
 #include <stdio.h>
 
 BOARDS_T board;

@@ -70,29 +70,29 @@ CMakeFiles/main.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main.dir/main.c.s"
 	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /workspaces/Chess-Engine/main.c -o CMakeFiles/main.dir/main.c.s
 
-CMakeFiles/main.dir/board_utils.c.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/board_utils.c.o: ../board_utils.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/workspaces/Chess-Engine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/main.dir/board_utils.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main.dir/board_utils.c.o   -c /workspaces/Chess-Engine/board_utils.c
+CMakeFiles/main.dir/board.c.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/board.c.o: ../board.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/workspaces/Chess-Engine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/main.dir/board.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main.dir/board.c.o   -c /workspaces/Chess-Engine/board.c
 
-CMakeFiles/main.dir/board_utils.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main.dir/board_utils.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /workspaces/Chess-Engine/board_utils.c > CMakeFiles/main.dir/board_utils.c.i
+CMakeFiles/main.dir/board.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main.dir/board.c.i"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /workspaces/Chess-Engine/board.c > CMakeFiles/main.dir/board.c.i
 
-CMakeFiles/main.dir/board_utils.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main.dir/board_utils.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /workspaces/Chess-Engine/board_utils.c -o CMakeFiles/main.dir/board_utils.c.s
+CMakeFiles/main.dir/board.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main.dir/board.c.s"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /workspaces/Chess-Engine/board.c -o CMakeFiles/main.dir/board.c.s
 
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/main.c.o" \
-"CMakeFiles/main.dir/board_utils.c.o"
+"CMakeFiles/main.dir/board.c.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
 
 main: CMakeFiles/main.dir/main.c.o
-main: CMakeFiles/main.dir/board_utils.c.o
+main: CMakeFiles/main.dir/board.c.o
 main: CMakeFiles/main.dir/build.make
 main: CMakeFiles/main.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/workspaces/Chess-Engine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable main"

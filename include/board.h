@@ -1,9 +1,11 @@
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef BOARD_UTILS
+#define BOARD_UTILS
 
 #include <stdint.h>
 #include <string.h>
 
+#define SET_BIT(bb, sq) (bb |= (1ULL << sq))
+#define GET_BIT(bb, sq) (bb & (1ULL << sq))
 #define START_POS "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 // Little Endian Rank-File Mapping
@@ -26,6 +28,10 @@ typedef enum COLOURS {
     black, white
 } COLOURS;
 
+typedef enum CASTLING_RIGHTS {
+    wkingside = 1, wqueenside, bkingside = 4, bqueenside = 8
+} CASTLING_RIGHTS;
+
 typedef struct BOARDS_T {
     __uint64_t bitboards[15];
     int side;
@@ -34,10 +40,6 @@ typedef struct BOARDS_T {
     int halfmove;
     int fullmove;
 } BOARDS_T;
-
-typedef enum CASTLING_RIGHTS {
-    wkingside = 1, wqueenside, bkingside = 4, bqueenside = 8
-} CASTLING_RIGHTS;
 
 #define CLEAR_ALL_BITBOARDS() (memset(board.bitboards, 0ULL, 120))
 #define RESET_BOARD() do { \
@@ -49,7 +51,10 @@ typedef enum CASTLING_RIGHTS {
     board.fullmove = 1; \
 } while (0)
 
-
 extern BOARDS_T board;
+
+void print_board();
+void print_bitboard(uint64_t bitboard);
+void setup_board(char *fen);
 
 #endif
