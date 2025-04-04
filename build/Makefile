@@ -123,33 +123,6 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
-board.o: board.c.o
-
-.PHONY : board.o
-
-# target to build an object file
-board.c.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.o
-.PHONY : board.c.o
-
-board.i: board.c.i
-
-.PHONY : board.i
-
-# target to preprocess a source file
-board.c.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.i
-.PHONY : board.c.i
-
-board.s: board.c.s
-
-.PHONY : board.s
-
-# target to generate assembly for a file
-board.c.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/board.c.s
-.PHONY : board.c.s
-
 main.o: main.c.o
 
 .PHONY : main.o
@@ -177,6 +150,60 @@ main.c.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.c.s
 .PHONY : main.c.s
 
+src/board.o: src/board.c.o
+
+.PHONY : src/board.o
+
+# target to build an object file
+src/board.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/board.c.o
+.PHONY : src/board.c.o
+
+src/board.i: src/board.c.i
+
+.PHONY : src/board.i
+
+# target to preprocess a source file
+src/board.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/board.c.i
+.PHONY : src/board.c.i
+
+src/board.s: src/board.c.s
+
+.PHONY : src/board.s
+
+# target to generate assembly for a file
+src/board.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/board.c.s
+.PHONY : src/board.c.s
+
+src/move.o: src/move.c.o
+
+.PHONY : src/move.o
+
+# target to build an object file
+src/move.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/move.c.o
+.PHONY : src/move.c.o
+
+src/move.i: src/move.c.i
+
+.PHONY : src/move.i
+
+# target to preprocess a source file
+src/move.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/move.c.i
+.PHONY : src/move.c.i
+
+src/move.s: src/move.c.s
+
+.PHONY : src/move.s
+
+# target to generate assembly for a file
+src/move.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/move.c.s
+.PHONY : src/move.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -186,12 +213,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... main"
-	@echo "... board.o"
-	@echo "... board.i"
-	@echo "... board.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... src/board.o"
+	@echo "... src/board.i"
+	@echo "... src/board.s"
+	@echo "... src/move.o"
+	@echo "... src/move.i"
+	@echo "... src/move.s"
 .PHONY : help
 
 

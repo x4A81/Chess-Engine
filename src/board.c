@@ -1,4 +1,4 @@
-#include "include/board.h"
+#include "../include/board.h"
 #include <stdio.h>
 
 void print_board() {

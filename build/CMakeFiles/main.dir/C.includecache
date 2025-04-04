@@ -12,9 +12,17 @@ stdint.h
 string.h
 -
 
-/workspaces/Chess-Engine/main.c
-include/board.h
+/workspaces/Chess-Engine/include/move.h
+stdint.h
+-
+
+/workspaces/Chess-Engine/src/board.c
+../include/board.h
 /workspaces/Chess-Engine/include/board.h
 stdio.h
 -
+
+/workspaces/Chess-Engine/src/move.c
+../include/move.h
+/workspaces/Chess-Engine/include/move.h
 

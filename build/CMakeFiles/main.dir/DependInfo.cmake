@@ -4,8 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/workspaces/Chess-Engine/board.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/board.c.o"
   "/workspaces/Chess-Engine/main.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/main.c.o"
+  "/workspaces/Chess-Engine/src/board.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/board.c.o"
+  "/workspaces/Chess-Engine/src/move.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/move.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

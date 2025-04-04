@@ -51,6 +51,9 @@ typedef struct BOARDS_T {
     board.fullmove = 1; \
 } while (0)
 
+#define SAVE_BOARD() (BOARDS_T saved_board = board)
+#define RESTORE_BOARD() (board = saved_board)
+
 extern BOARDS_T board;
 
 void print_board();

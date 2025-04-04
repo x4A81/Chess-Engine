@@ -6,7 +6,12 @@
 },
 {
   "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/board.c.o   -c /workspaces/Chess-Engine/board.c",
-  "file": "/workspaces/Chess-Engine/board.c"
+  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/src/board.c.o   -c /workspaces/Chess-Engine/src/board.c",
+  "file": "/workspaces/Chess-Engine/src/board.c"
+},
+{
+  "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/src/move.c.o   -c /workspaces/Chess-Engine/src/move.c",
+  "file": "/workspaces/Chess-Engine/src/move.c"
 }
 ]
