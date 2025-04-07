@@ -52,11 +52,11 @@ void add_move(MOVE_LIST_T *list, uint16_t move);
 void generate_moves(int side);
 void make_move(uint16_t move);
 
-void initialise_pawn_move_table();
-void initialise_knight_move_table();
-void initialise_king_move_table();
+void generate_pawn_move_table();
+void generate_knight_move_table();
+void generate_king_move_table();
 
-extern uint64_t pawn_move_table[2][64];
+extern uint64_t pawn_move_table[64][2];
 extern uint64_t knight_move_table[64];
 extern uint64_t king_move_table[64];
 

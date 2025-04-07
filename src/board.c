@@ -42,8 +42,8 @@ void print_board() {
 
 void print_bitboard(uint64_t bb) {
     printf("\nBitboard val: %lu \n", bb);
-    for (int r = 0; r < 8; r++) {
-      printf(" %d |", 8-r);
+    for (int r = 7; r >= 0; r--) {
+      printf(" %d |", r);
       for (int f = 0; f < 8; f++) {
         int sq = 8*r+f;
         printf(" %d ", GET_BIT(bb, sq) ? 1 : 0);

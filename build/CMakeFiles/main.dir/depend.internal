@@ -3,6 +3,7 @@
 
 CMakeFiles/main.dir/main.c.o
  /workspaces/Chess-Engine/include/board.h
+ /workspaces/Chess-Engine/include/move.h
  /workspaces/Chess-Engine/main.c
 CMakeFiles/main.dir/src/board.c.o
  /workspaces/Chess-Engine/include/board.h
