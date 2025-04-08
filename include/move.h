@@ -1,5 +1,5 @@
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef MOVE_H_INCLUDE
+#define MOVE_H_INCLUDE
 
 #include <stdint.h>
 
@@ -38,26 +38,13 @@ typedef struct MOVE_LIST_T {
     int count;
 } MOVE_LIST_T;
 
-typedef enum MOVE_TYPES {
-    quiet, dbp_pawn, king_castle, queen_castle, capture, ep_capture,
-    knight_promo = 8, bishop_promo, rook_promo, queen_promo,
-    knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
-} MOVE_TYPES;
-
-#define GET_FROM(move) ((move) & 0b111111)
-#define GET_TO(move) (((move) >> 6) & 0b111111)
-
 void add_move(MOVE_LIST_T *list, uint16_t move);
 
 void generate_moves(int side);
 void make_move(uint16_t move);
 
-void generate_pawn_move_table();
-void generate_knight_move_table();
-void generate_king_move_table();
+void generate_magics();
 
-extern uint64_t pawn_move_table[64][2];
-extern uint64_t knight_move_table[64];
-extern uint64_t king_move_table[64];
+uint64_t mask_bishop_movement(int sq);
 
 #endif

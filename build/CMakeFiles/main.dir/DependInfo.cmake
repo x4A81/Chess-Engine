@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/workspaces/Chess-Engine/main.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/main.c.o"
   "/workspaces/Chess-Engine/src/board.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/board.c.o"
   "/workspaces/Chess-Engine/src/move.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/move.c.o"
+  "/workspaces/Chess-Engine/src/rng.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/rng.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

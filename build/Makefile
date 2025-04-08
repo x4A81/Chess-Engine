@@ -204,6 +204,33 @@ src/move.c.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/move.c.s
 .PHONY : src/move.c.s
 
+src/rng.o: src/rng.c.o
+
+.PHONY : src/rng.o
+
+# target to build an object file
+src/rng.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/rng.c.o
+.PHONY : src/rng.c.o
+
+src/rng.i: src/rng.c.i
+
+.PHONY : src/rng.i
+
+# target to preprocess a source file
+src/rng.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/rng.c.i
+.PHONY : src/rng.c.i
+
+src/rng.s: src/rng.c.s
+
+.PHONY : src/rng.s
+
+# target to generate assembly for a file
+src/rng.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/rng.c.s
+.PHONY : src/rng.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,6 +249,9 @@ help:
 	@echo "... src/move.o"
 	@echo "... src/move.i"
 	@echo "... src/move.s"
+	@echo "... src/rng.o"
+	@echo "... src/rng.i"
+	@echo "... src/rng.s"
 .PHONY : help
 
 

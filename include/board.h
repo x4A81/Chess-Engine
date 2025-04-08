@@ -1,11 +1,12 @@
-#ifndef BOARD_UTILS
-#define BOARD_UTILS
+#ifndef BOARD_H_INCLUDE
+#define BOARD_H_INCLUDE
 
 #include <stdint.h>
 #include <string.h>
 
 #define SET_BIT(bb, sq) (bb |= (1ULL << sq))
 #define GET_BIT(bb, sq) (bb & (1ULL << sq))
+#define POP_BIT(bb, sq) (bb &= ~(1ULL << sq))
 #define START_POS "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 // Little Endian Rank-File Mapping
@@ -33,7 +34,7 @@ typedef enum CASTLING_RIGHTS {
 } CASTLING_RIGHTS;
 
 typedef struct BOARDS_T {
-    __uint64_t bitboards[15];
+    uint64_t bitboards[15];
     int side;
     int castling;
     int enpassant;
@@ -59,5 +60,22 @@ extern BOARDS_T board;
 void print_board();
 void print_bitboard(uint64_t bitboard);
 void setup_board(char *fen);
+
+static inline int pop_count(uint64_t bb) {
+    int count = 0;
+    while (bb) {
+        count++;
+        bb &= bb - 1;
+    }
+
+    return count;
+}
+
+static inline int ls1b(uint64_t bb) {
+    if (bb)
+        return pop_count((bb & -bb) - 1);
+    else
+        return -1;
+}
 
 #endif
