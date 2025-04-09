@@ -33,14 +33,14 @@ typedef enum CASTLING_RIGHTS {
     wkingside = 1, wqueenside, bkingside = 4, bqueenside = 8
 } CASTLING_RIGHTS;
 
-typedef struct BOARDS_T {
-    uint64_t bitboards[15];
+typedef struct BOARD_T {
+    uint64_t bitboards[15]; // pnbrqkPNBRQK black white all
     int side;
     int castling;
     int enpassant;
     int halfmove;
     int fullmove;
-} BOARDS_T;
+} BOARD_T;
 
 #define CLEAR_ALL_BITBOARDS() (memset(board.bitboards, 0ULL, 120))
 #define RESET_BOARD() do { \
@@ -55,7 +55,7 @@ typedef struct BOARDS_T {
 #define SAVE_BOARD() (BOARDS_T saved_board = board)
 #define RESTORE_BOARD() (board = saved_board)
 
-extern BOARDS_T board;
+extern BOARD_T board;
 
 void print_board();
 void print_bitboard(uint64_t bitboard);

@@ -2,6 +2,7 @@
 #define MOVE_H_INCLUDE
 
 #include <stdint.h>
+#include "board.h"
 
 /*
 Moves are encoded with the 4 bits as the type of move
@@ -38,13 +39,9 @@ typedef struct MOVE_LIST_T {
     int count;
 } MOVE_LIST_T;
 
+void initialise_sliding_move_tables(int bishop_f);
 void add_move(MOVE_LIST_T *list, uint16_t move);
-
-void generate_moves(int side);
+int is_square_attacked(int sq, int side);
+void generate_moves(MOVE_LIST_T *move_list);
 void make_move(uint16_t move);
-
-void generate_magics();
-
-uint64_t mask_bishop_movement(int sq);
-
 #endif

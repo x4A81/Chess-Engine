@@ -43,7 +43,7 @@ void print_board() {
 void print_bitboard(uint64_t bb) {
     printf("\nBitboard val: %lu \n", bb);
     for (int r = 7; r >= 0; r--) {
-      printf(" %d |", r);
+      printf(" %d |", r+1);
       for (int f = 0; f < 8; f++) {
         int sq = 8*r+f;
         printf(" %d ", GET_BIT(bb, sq) ? 1 : 0);
@@ -61,7 +61,7 @@ void setup_board(char *fen) {
         ['P'] = 6, ['N'] = 7, ['B'] = 8, ['R'] = 9, ['Q'] = 10, ['K'] = 11};
     RESET_BOARD();
 
-    for (int r = 0; r < 8; r++) {
+    for (int r = 7; r >= 0; r--) {
         for (int f = 0; f < 8; f++) {
             int sq = 8*r+f;
             if ((*fen >= 'a' && *fen <= 'z') || ((*fen >= 'A' && *fen <= 'Z'))) {
@@ -133,4 +133,8 @@ void setup_board(char *fen) {
       *fen++;
     }
   }
+
+  board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
+  board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
+  board.bitboards[14] = board.bitboards[12] | board.bitboards[13];
 }
