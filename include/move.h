@@ -40,8 +40,9 @@ typedef struct MOVE_LIST_T {
 } MOVE_LIST_T;
 
 void initialise_sliding_move_tables(int bishop_f);
-void add_move(MOVE_LIST_T *list, uint16_t move);
-int is_square_attacked(int sq, int side);
+void add_move(MOVE_LIST_T *move_list, int from, int to, int code);
+uint64_t get_psuedo_attackers(int sq, int side);
 void generate_moves(MOVE_LIST_T *move_list);
 void make_move(uint16_t move);
+void print_move(uint16_t move);
 #endif

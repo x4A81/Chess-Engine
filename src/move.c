@@ -6,11 +6,11 @@
 #include <inttypes.h>
 #include <string.h>
 
-#define GET_FROM(move) ((move) & 0b111111)
-#define GET_TO(move) (((move) >> 6) & 0b111111)
+#define GET_FROM(move) (move & 0b111111)
+#define GET_TO(move) ((move >> 6) & 0b111111)
 
 typedef enum MOVE_TYPES {
-    quiet, dbp_pawn, king_castle, queen_castle, capture, ep_capture,
+    quiet, db_pawn, king_castle, queen_castle, capture, ep_capture,
     knight_promo = 8, bishop_promo, rook_promo, queen_promo,
     knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
 } MOVE_TYPES;
@@ -313,7 +313,7 @@ uint64_t queen_moves(int sq, uint64_t bb) {
     return rook_moves(sq, bb) | bishop_moves(sq, bb);
 }
 
-int is_square_attacked(int sq, int side) {
+uint64_t get_psuedo_attackers(int sq, int side) {
     uint64_t bb, attack_bb;
     int is_attacked = 0;
 
@@ -327,38 +327,339 @@ int is_square_attacked(int sq, int side) {
 
     // Attacks by bishops & diagonal attacks by queen
     bb = bishop_moves(sq, board.bitboards[14]);
-    print_bitboard(bb);
-    attack_bb |= bb & ((side == white) ? board.bitboards[B] | board.bitboards[Q] : board.bitboards[n] | board.bitboards[q]);
+    attack_bb |= bb & ((side == white) ? board.bitboards[B] | board.bitboards[Q] : board.bitboards[b] | board.bitboards[q]);
     
     // Attacks by rook & straight attacks by queen
     bb = rook_moves(sq, board.bitboards[14]);
     attack_bb |= bb & ((side == white) ? board.bitboards[R] | board.bitboards[Q] : board.bitboards[r] | board.bitboards[q]);
     
-    
-    print_bitboard(attack_bb);
-    return 0;
+    // Attacks by opposing king
+    bb = (side == white) ? king_move_table[sq] : king_move_table[sq];
+    attack_bb |= bb & ((side == white) ? board.bitboards[K] : board.bitboards[k]);
+
+    // Enpassant
+    if (board.enpassant == sq)
+        attack_bb |= 1ULL << sq; // Set the sq to 1 if it is the enpassant target.
+        // TODO: add better check for enpassant attackers
+
+    return attack_bb; // If the attack board is empty then the square is not attacked
 }
 
 void generate_moves(MOVE_LIST_T *move_list) {
+    move_list->count = 0;
+
     /*
     1. Detect legal king moves.
-    Evasion from sliding pieces (x-ray attacks through king)
-    
     2. Check evasions and double check.
-    Enpassant check evasion
-
     3. Pinned pieces
-
     4. Other moves 
-    Enpassant discovered check
+    NB. Enpassant discovered check
     */
 
-    int from_sq;
-    uint64_t attack_bb;
+    int king_sq, from_sq, to_sq, i;
+    uint64_t attack_bb, piece_bb,
+    capture_mask = UINT64_C(0xFFFFFFFFFFFFFFFF),
+    push_mask = capture_mask;
     
+    // Step 1. Detect legal king moves.
 
+    if (board.side == white)
+        king_sq = ls1b(board.bitboards[K]);
+    else 
+        king_sq = ls1b(board.bitboards[k]);
+    
+    // Set the attackbb to the king moves that don't capture friendly pieces.
+    attack_bb = king_move_table[king_sq] & ~board.bitboards[12+board.side];
+    
+    // Pop bit from all bitboard, deals with x-ray attacks.
+    POP_BIT(board.bitboards[14], king_sq); 
+    while (attack_bb) {
+        to_sq = ls1b(attack_bb);
+        POP_BIT(attack_bb, to_sq);
+        if (get_psuedo_attackers(to_sq, ~board.side))
+            continue;
+        
+        // add king moves
+        int code = quiet;
+
+        // Move is a capture
+        if ((1ULL << to_sq) & board.bitboards[13-board.side])
+            code = capture;
+
+        add_move(move_list, king_sq, to_sq, code);
+    }
+
+    SET_BIT(board.bitboards[14], king_sq);
+
+    // Step 2. Check evasions and double check.
+
+    uint64_t checkers = get_psuedo_attackers(king_sq, ~board.side);
+
+    // If in double check then only king moves are legal
+    if (pop_count(checkers) > 1) return;
+
+    /*
+    If single check:
+    1. Move king (already done)
+    2. Capture the attacking pieces
+    3. Block (if checker is sliding piece)
+    */
+
+    int slider;
+    uint64_t attacking_bishops = 0ULL, attacking_rooks = 0ULL, attacking_queens = 0ULL;
+    uint64_t king_rook_rays = rook_moves(king_sq, board.bitboards[14]),
+        king_bishop_rays = bishop_moves(king_sq, board.bitboards[14]);
+
+    if (board.side == white) {
+        attacking_rooks = board.bitboards[r];
+        attacking_bishops = board.bitboards[b];
+        attacking_queens = board.bitboards[q];
+    } else {
+        attacking_rooks = board.bitboards[R];
+        attacking_bishops = board.bitboards[B];
+        attacking_queens = board.bitboards[Q];
+    }
+
+    if (pop_count(checkers) == 1) { 
+        
+        // 2. Capture checkers
+        capture_mask = checkers;
+
+        // 3. Block ray attacks
+
+        push_mask = 0ULL;
+
+        // Calculate bishop, rook and queen rays that attack the king. (push mask)
+        attack_bb = attacking_bishops & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+            POP_BIT(attack_bb, slider);
+        }
+
+        attack_bb = attacking_rooks & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            push_mask |= rook_moves(slider, board.bitboards[14]) & king_rook_rays;
+            POP_BIT(attack_bb, slider);
+        }
+
+        attack_bb = attacking_queens & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            if (rook_moves(slider, board.bitboards[14]) & (1ULL << king_sq))
+                push_mask |= rook_moves(slider, board.bitboards[14]) & king_rook_rays;
+            else
+                push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+            POP_BIT(attack_bb, slider);
+        }
+    }
+
+    // Step 3. Pinned Pieces.
+
+    /*
+    1. Calculate moves from opponent sliding pieces.
+    2. Sliding piece moves from king union.
+    3. Union of 1. and 2..
+    
+    If 3. union friendly pieces then it is absolutely pinned.
+    */
+
+    uint64_t pinned_pieces = 0ULL;
+    uint64_t pinned_movement[8];
+    int rays_to_king = 0;
+    king_rook_rays = rook_moves(king_sq, board.bitboards[13 - board.side]);
+    king_bishop_rays = bishop_moves(king_sq, board.bitboards[13 - board.side]);
+
+    while (attacking_bishops) {
+        slider = ls1b(attacking_bishops);
+        pinned_movement[rays_to_king++] = ((bishop_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
+             & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_bishop_rays;
+        POP_BIT(attacking_bishops, slider);
+    }
+
+    while (attacking_rooks) {
+        slider = ls1b(attacking_rooks);
+        pinned_movement[rays_to_king++] |= ((rook_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
+             & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_rook_rays;
+        POP_BIT(attacking_rooks, slider);
+    }
+
+    while (attacking_queens) {
+        slider = ls1b(attacking_queens);
+        if (rook_moves(slider, board.bitboards[13 - board.side] & (1ULL << king_sq))) {
+            pinned_movement[rays_to_king++] |= ((rook_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
+                 & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_rook_rays;
+        } else {
+            pinned_movement[rays_to_king++] = ((bishop_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
+                 & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_bishop_rays;
+        }
+        POP_BIT(attacking_queens, slider);
+    }
+
+    for (int i = 0; i < rays_to_king; i++) {
+        if (pop_count(pinned_movement[i] & board.bitboards[12 + board.side]) == 1)
+            pinned_pieces |= pinned_movement[i] & board.bitboards[12 + board.side];
+    }
+
+    // Step 4. Other Moves
+    /*
+    Things to consider:
+    1. Check if can castle:
+        - If in check you can't castle
+        - If the squares that involve castling aren't free or are attacked
+        - If the rook has been captured (handled in the make_move function)
+    2. Enpassant discovered check
+    */
+
+    // Castling
+
+    if (pop_count(checkers) == 0) {
+        if (board.castling & wkingside) {
+            if (!(board.bitboards[14] & ((1ULL << f1) | (1ULL << g1)))) {
+                if (!(get_psuedo_attackers(f1, ~board.side) || get_psuedo_attackers(g1, ~board.side)))
+                    add_move(move_list, from_sq, to_sq, king_castle);
+            }
+        }
+        
+        if (board.castling & wqueenside) {
+            if (!(board.bitboards[14] & ((1ULL << d1) | (1ULL << c1) | (1ULL << b1)))) {
+                if (!(get_psuedo_attackers(d1, ~board.side) || get_psuedo_attackers(c1, ~board.side)))
+                    add_move(move_list, from_sq, to_sq, king_castle);
+            }
+        }
+        
+        if (board.castling & bkingside) {
+            if (!(board.bitboards[14] & ((1ULL << f8) | (1ULL << g8)))) {
+                if (!(get_psuedo_attackers(f8, ~board.side) || get_psuedo_attackers(g8, ~board.side)))
+                    add_move(move_list, from_sq, to_sq, king_castle);
+            }
+        }
+        
+        if (board.castling & bqueenside) {
+            if (!(board.bitboards[14] & ((1ULL << d8) | (1ULL << c8) | (1ULL << b8)))) {
+                if (!(get_psuedo_attackers(d8, ~board.side) || get_psuedo_attackers(c8, ~board.side)))
+                    add_move(move_list, from_sq, to_sq, king_castle);
+            }
+        }
+    }
+    
+    // Pawn moves
+
+    if (board.side == white)
+        piece_bb = board.bitboards[P];
+    else
+        piece_bb = board.bitboards[p];
+
+    while (piece_bb) {
+        from_sq = ls1b(piece_bb);
+        POP_BIT(piece_bb, from_sq);
+
+        // Deal with pawn (dbl) pushes and promotions
+        attack_bb = pawn_move_table[from_sq][board.side] & push_mask & ~board.bitboards[14];
+
+        // Pinned piece movement
+        if ((1ULL << from_sq) & pinned_pieces) {
+            for (i = 0; i < rays_to_king; i++) {
+                if ((1ULL << from_sq) & pinned_movement[i]) {
+                    attack_bb &= pinned_movement[i];
+                    break;
+                }
+            }
+        }
+
+        while (attack_bb) {
+            to_sq = ls1b(attack_bb);
+            POP_BIT(attack_bb, to_sq);
+            if (to_sq >= a8) {
+                add_move(move_list, from_sq, to_sq, knight_promo);
+                add_move(move_list, from_sq, to_sq, bishop_promo);
+                add_move(move_list, from_sq, to_sq, queen_promo);
+                add_move(move_list, from_sq, to_sq, rook_promo);
+            } else if (to_sq-from_sq == 16) {
+                if (!((1ULL << from_sq << 8) & board.bitboards[14]))
+                    add_move(move_list, from_sq, to_sq, db_pawn);
+            } else {
+                add_move(move_list, from_sq, to_sq, quiet);
+            }
+        }
+
+        // Deal with pawn attacks and promotions
+        
+        // Enpassant and enpassant discovered check
+        if (board.enpassant) {
+            // Enpassant discovered check
+            POP_BIT(board.bitboards[14], from_sq);
+
+            attack_bb = pawn_attack_table[from_sq][board.side] & (board.bitboards[13-board.side] | (1ULL << board.enpassant));
+            if (board.side == white) {
+                POP_BIT(board.bitboards[14], board.enpassant - 8);
+                // Enpassant discovered check
+                if (get_psuedo_attackers(king_sq, ~board.side))
+                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                // If enpassant captures or blocks a checker
+                if (!((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                SET_BIT(board.bitboards[14], board.enpassant - 8);
+            } else {
+                POP_BIT(board.bitboards[14], board.enpassant + 8);
+                // Enpassant discovered check
+                if (get_psuedo_attackers(king_sq, ~board.side))
+                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                // If enpassant captures or blocks a checker
+                if (!((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                SET_BIT(board.bitboards[14], board.enpassant + 8);
+            }
+
+            SET_BIT(board.bitboards[14], from_sq);
+        } else
+            attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+        
+        // Pinned piece movement
+        if ((1ULL << from_sq) & pinned_pieces)
+            attack_bb &= pinned_movement[i];
+
+        while (attack_bb) {
+            to_sq = ls1b(attack_bb);
+            POP_BIT(attack_bb, to_sq);
+            if (to_sq >= a8) {
+                add_move(move_list, from_sq, to_sq, knight_promo_capture);
+                add_move(move_list, from_sq, to_sq, bishop_promo_capture);
+                add_move(move_list, from_sq, to_sq, rook_promo_capture);
+                add_move(move_list, from_sq, to_sq, queen_promo_capture);
+            } else if (to_sq == board.enpassant) {
+                add_move(move_list, from_sq, to_sq, ep_capture);
+            } else
+                add_move(move_list, from_sq, to_sq, capture);
+        }
+    }
+
+    // Knight moves
+
+    // Bishop moves
+
+    // Rook moves
+
+    // Queen moves
 }
 
 void make_move(uint16_t move) {
-    
+    /*
+    Things to consider:
+    1. Update castling rights
+    2. Update enpassant square
+    */
+}
+
+void print_move(uint16_t move) {
+    printf("%s ", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
+         'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8)});
+    printf("%d\n", (move >> 12));
+}
+
+void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
+    uint16_t move = UINT16_C(from | (to << 6) | (code << 12));
+    move_list->moves[move_list->count] = move;
+    move_list->count++;
 }

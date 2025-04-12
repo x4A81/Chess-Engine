@@ -4,9 +4,9 @@
 void print_board() {
     char *piece_chars = "pnbrqkPNBRQK";
     printf("--------------------------------------------\n");
-    for (int r = 0; r < 8; r++) {
+    for (int r = 7; r >= 0; r--) {
         for (int i = 0; i < 3; i++) {
-            if (i==1) printf("%d ", 8-r);
+            if (i==1) printf("%d ", r+1);
             else printf("| ");
             for (int f = 0; f < 8; f++) {
                 char piece_char = ((r+f)%2 == 0) ? ' ' : '#';
@@ -35,7 +35,7 @@ void print_board() {
     printf("----a----b----c----d----e----f----g----h----\n");
     printf("Side To move: %s\n", (board.side == white) ? "white" : "black");
     printf("Castling: %d\n", board.castling);
-    printf("Enpassant square: %s\n", " ");
+    printf("Enpassant square: %s\n", (board.enpassant == -1) ? "-" : (char[]){'a' + (board.enpassant % 8), '1' + (board.enpassant / 8)});
     printf("Halfmove Clock: %d\n", board.halfmove);
     printf("Full moves: %d\n", board.fullmove);
 }
@@ -112,7 +112,7 @@ void setup_board(char *fen) {
 
   *fen++;
   if (*fen != '-') {
-    int f = fen[0] - 'a', r = 8 - (fen[1] - '0');
+    int f = fen[0] - 'a', r = (fen[1] - '0') - 1;
     board.enpassant = 8*r+f;
     *fen++;
   }
