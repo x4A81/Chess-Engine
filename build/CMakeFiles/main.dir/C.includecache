@@ -18,11 +18,21 @@ stdint.h
 board.h
 /workspaces/Chess-Engine/include/board.h
 
-/workspaces/Chess-Engine/main.c
-include/board.h
-/workspaces/Chess-Engine/include/board.h
-include/move.h
+/workspaces/Chess-Engine/include/rng.h
+stdint.h
+-
+
+/workspaces/Chess-Engine/src/move.c
+../include/move.h
 /workspaces/Chess-Engine/include/move.h
+../include/board.h
+/workspaces/Chess-Engine/include/board.h
+../include/rng.h
+/workspaces/Chess-Engine/include/rng.h
 stdio.h
+-
+inttypes.h
+-
+string.h
 -
 
