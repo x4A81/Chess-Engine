@@ -1,22 +1,32 @@
 [
 {
   "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/main.c.o   -c /workspaces/Chess-Engine/main.c",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/main.c.o   -c /workspaces/Chess-Engine/main.c",
   "file": "/workspaces/Chess-Engine/main.c"
 },
 {
   "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/src/board.c.o   -c /workspaces/Chess-Engine/src/board.c",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/board.c.o   -c /workspaces/Chess-Engine/src/board.c",
   "file": "/workspaces/Chess-Engine/src/board.c"
 },
 {
   "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/src/move.c.o   -c /workspaces/Chess-Engine/src/move.c",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/move.c.o   -c /workspaces/Chess-Engine/src/move.c",
   "file": "/workspaces/Chess-Engine/src/move.c"
 },
 {
   "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc   -g   -o CMakeFiles/main.dir/src/rng.c.o   -c /workspaces/Chess-Engine/src/rng.c",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/rng.c.o   -c /workspaces/Chess-Engine/src/rng.c",
   "file": "/workspaces/Chess-Engine/src/rng.c"
+},
+{
+  "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/uci.c.o   -c /workspaces/Chess-Engine/src/uci.c",
+  "file": "/workspaces/Chess-Engine/src/uci.c"
+},
+{
+  "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/tests/test.c.o   -c /workspaces/Chess-Engine/tests/test.c",
+  "file": "/workspaces/Chess-Engine/tests/test.c"
 }
 ]

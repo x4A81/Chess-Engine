@@ -5,12 +5,15 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define GET_FROM(move) (move & 0b111111)
 #define GET_TO(move) ((move >> 6) & 0b111111)
+#define GET_CODE(move) ((move >> 12) & 0b1111)
+#define GET_MOD(move) ((move >> 16) & 0b111111)
 
 typedef enum MOVE_TYPES {
-    quiet, db_pawn, king_castle, queen_castle, capture, ep_capture,
+    quiet, dbl_pawn, king_castle, queen_castle, capture, ep_capture,
     knight_promo = 8, bishop_promo, rook_promo, queen_promo,
     knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
 } MOVE_TYPES;
@@ -356,10 +359,10 @@ void generate_moves(MOVE_LIST_T *move_list) {
     NB. Enpassant discovered check
     */
 
-    int king_sq, from_sq, to_sq, i;
-    uint64_t attack_bb, piece_bb,
+    int king_sq = -1, from_sq = -1, to_sq = -1, i = 0;
+    uint64_t attack_bb = UINT64_C(0), piece_bb = UINT64_C(0),
     capture_mask = UINT64_C(0xFFFFFFFFFFFFFFFF),
-    push_mask = capture_mask;
+    push_mask = UINT64_C(0xFFFFFFFFFFFFFFFF);
     
     // Step 1. Detect legal king moves.
 
@@ -376,7 +379,7 @@ void generate_moves(MOVE_LIST_T *move_list) {
     while (attack_bb) {
         to_sq = ls1b(attack_bb);
         POP_BIT(attack_bb, to_sq);
-        if (get_psuedo_attackers(to_sq, ~board.side))
+        if (get_psuedo_attackers(to_sq, !board.side))
             continue;
         
         // add king moves
@@ -386,18 +389,17 @@ void generate_moves(MOVE_LIST_T *move_list) {
         if ((1ULL << to_sq) & board.bitboards[13-board.side])
             code = capture;
 
-        add_move(move_list, king_sq, to_sq, code);
+        add_move(move_list, king_sq, to_sq, code, 0);
     }
 
     SET_BIT(board.bitboards[14], king_sq);
 
     // Step 2. Check evasions and double check.
 
-    uint64_t checkers = get_psuedo_attackers(king_sq, ~board.side);
+    uint64_t checkers = get_psuedo_attackers(king_sq, !board.side);
 
     // If in double check then only king moves are legal
     if (pop_count(checkers) > 1) return;
-
     /*
     If single check:
     1. Move king (already done)
@@ -421,7 +423,6 @@ void generate_moves(MOVE_LIST_T *move_list) {
     }
 
     if (pop_count(checkers) == 1) { 
-        
         // 2. Capture checkers
         capture_mask = checkers;
 
@@ -465,41 +466,53 @@ void generate_moves(MOVE_LIST_T *move_list) {
     If 3. union friendly pieces then it is absolutely pinned.
     */
 
-    uint64_t pinned_pieces = 0ULL;
-    uint64_t pinned_movement[8];
+    uint64_t pinned_pieces = UINT64_C(0);
+    uint64_t pinned_movement[8] = {UINT64_C(0)};
     int rays_to_king = 0;
-    king_rook_rays = rook_moves(king_sq, board.bitboards[13 - board.side]);
-    king_bishop_rays = bishop_moves(king_sq, board.bitboards[13 - board.side]);
 
-    while (attacking_bishops) {
-        slider = ls1b(attacking_bishops);
-        pinned_movement[rays_to_king++] = ((bishop_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
-             & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_bishop_rays;
-        POP_BIT(attacking_bishops, slider);
-    }
+    // Calculate rays from the king
+    king_rook_rays = rook_moves(king_sq, board.bitboards[14]);
+    king_bishop_rays = bishop_moves(king_sq, board.bitboards[14]);
 
-    while (attacking_rooks) {
-        slider = ls1b(attacking_rooks);
-        pinned_movement[rays_to_king++] |= ((rook_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
-             & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_rook_rays;
-        POP_BIT(attacking_rooks, slider);
-    }
-
-    while (attacking_queens) {
-        slider = ls1b(attacking_queens);
-        if (rook_moves(slider, board.bitboards[13 - board.side] & (1ULL << king_sq))) {
-            pinned_movement[rays_to_king++] |= ((rook_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
-                 & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_rook_rays;
-        } else {
-            pinned_movement[rays_to_king++] = ((bishop_moves(slider, board.bitboards[13 - board.side] | (1ULL << king_sq))
-                 & ~board.bitboards[13 - board.side]) | (1ULL << slider)) & king_bishop_rays;
+    attack_bb = attacking_bishops;
+    while (attack_bb) {
+        int slider = ls1b(attack_bb);
+        uint64_t ray = bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
+            pinned_pieces |= ray & board.bitboards[12 + board.side];
+            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
         }
-        POP_BIT(attacking_queens, slider);
+
+        POP_BIT(attack_bb, slider);
     }
 
-    for (int i = 0; i < rays_to_king; i++) {
-        if (pop_count(pinned_movement[i] & board.bitboards[12 + board.side]) == 1)
-            pinned_pieces |= pinned_movement[i] & board.bitboards[12 + board.side];
+    attack_bb = attacking_rooks;
+    while (attack_bb) {
+        int slider = ls1b(attack_bb);
+        uint64_t ray = rook_moves(slider, board.bitboards[14]) & king_rook_rays;
+        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
+            pinned_pieces |= ray & board.bitboards[12 + board.side];
+            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
+        }
+
+        POP_BIT(attack_bb, slider);
+    }
+
+    attack_bb = attacking_queens;
+    while (attack_bb) {
+        int slider = ls1b(attack_bb);
+        uint64_t ray = 0ULL;
+        if (rook_moves(slider, board.bitboards[14]) & (1ULL << king_sq))
+            ray = rook_moves(slider, board.bitboards[14]) & king_rook_rays;
+        else
+            ray = bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+        
+        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
+            pinned_pieces |= ray & board.bitboards[12 + board.side];
+            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
+        }
+
+        POP_BIT(attack_bb, slider);
     }
 
     // Step 4. Other Moves
@@ -515,31 +528,33 @@ void generate_moves(MOVE_LIST_T *move_list) {
     // Castling
 
     if (pop_count(checkers) == 0) {
-        if (board.castling & wkingside) {
-            if (!(board.bitboards[14] & ((1ULL << f1) | (1ULL << g1)))) {
-                if (!(get_psuedo_attackers(f1, ~board.side) || get_psuedo_attackers(g1, ~board.side)))
-                    add_move(move_list, e1, g1, king_castle);
+        if (board.side == white) {
+            if (board.castling & wkingside) {
+                if (!(board.bitboards[14] & ((1ULL << f1) | (1ULL << g1)))) {
+                    if (!(get_psuedo_attackers(f1, !board.side) || get_psuedo_attackers(g1, !board.side)))
+                        add_move(move_list, e1, g1, king_castle, board.castling);
+                }
             }
-        }
-        
-        if (board.castling & wqueenside) {
-            if (!(board.bitboards[14] & ((1ULL << d1) | (1ULL << c1) | (1ULL << b1)))) {
-                if (!(get_psuedo_attackers(d1, ~board.side) || get_psuedo_attackers(c1, ~board.side)))
-                    add_move(move_list, e1, c1, king_castle);
+            
+            if (board.castling & wqueenside) {
+                if (!(board.bitboards[14] & ((1ULL << d1) | (1ULL << c1) | (1ULL << b1)))) {
+                    if (!(get_psuedo_attackers(d1, !board.side) || get_psuedo_attackers(c1, !board.side)))
+                        add_move(move_list, e1, c1, king_castle, board.castling);
+                }
             }
-        }
-        
-        if (board.castling & bkingside) {
-            if (!(board.bitboards[14] & ((1ULL << f8) | (1ULL << g8)))) {
-                if (!(get_psuedo_attackers(f8, ~board.side) || get_psuedo_attackers(g8, ~board.side)))
-                    add_move(move_list, e8, g8, king_castle);
+        } else {
+            if (board.castling & bkingside) {
+                if (!(board.bitboards[14] & ((1ULL << f8) | (1ULL << g8)))) {
+                    if (!(get_psuedo_attackers(f8, !board.side) || get_psuedo_attackers(g8, !board.side)))
+                        add_move(move_list, e8, g8, king_castle, board.castling);
+                }
             }
-        }
-        
-        if (board.castling & bqueenside) {
-            if (!(board.bitboards[14] & ((1ULL << d8) | (1ULL << c8) | (1ULL << b8)))) {
-                if (!(get_psuedo_attackers(d8, ~board.side) || get_psuedo_attackers(c8, ~board.side)))
-                    add_move(move_list, e8, c8, king_castle);
+            
+            if (board.castling & bqueenside) {
+                if (!(board.bitboards[14] & ((1ULL << d8) | (1ULL << c8) | (1ULL << b8)))) {
+                    if (!(get_psuedo_attackers(d8, !board.side) || get_psuedo_attackers(c8, !board.side)))
+                        add_move(move_list, e8, c8, king_castle, board.castling);
+                }
             }
         }
     }
@@ -557,7 +572,6 @@ void generate_moves(MOVE_LIST_T *move_list) {
 
         // Deal with pawn (dbl) pushes and promotions
         attack_bb = pawn_move_table[from_sq][board.side] & push_mask & ~board.bitboards[14];
-
         // Pinned piece movement
         if ((1ULL << from_sq) & pinned_pieces) {
             for (i = 0; i < rays_to_king; i++) {
@@ -572,15 +586,20 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if (to_sq >= a8) {
-                add_move(move_list, from_sq, to_sq, knight_promo);
-                add_move(move_list, from_sq, to_sq, bishop_promo);
-                add_move(move_list, from_sq, to_sq, queen_promo);
-                add_move(move_list, from_sq, to_sq, rook_promo);
-            } else if (to_sq-from_sq == 16) {
-                if (!((1ULL << from_sq << 8) & board.bitboards[14]))
-                    add_move(move_list, from_sq, to_sq, db_pawn);
+                add_move(move_list, from_sq, to_sq, knight_promo, 0);
+                add_move(move_list, from_sq, to_sq, bishop_promo, 0);
+                add_move(move_list, from_sq, to_sq, queen_promo, 0);
+                add_move(move_list, from_sq, to_sq, rook_promo, 0);
+            } else if (to_sq-from_sq == 16 || to_sq-from_sq == -16) {
+                if (board.side == white) {
+                    if (!((1ULL << from_sq << 8) & board.bitboards[14]))
+                        add_move(move_list, from_sq, to_sq, dbl_pawn, 0);
+                } else {
+                    if (!((1ULL << from_sq >> 8) & board.bitboards[14]))
+                        add_move(move_list, from_sq, to_sq, dbl_pawn, 0);
+                }
             } else {
-                add_move(move_list, from_sq, to_sq, quiet);
+                add_move(move_list, from_sq, to_sq, quiet, 0);
             }
         }
 
@@ -595,7 +614,7 @@ void generate_moves(MOVE_LIST_T *move_list) {
             if (board.side == white) {
                 POP_BIT(board.bitboards[14], board.enpassant - 8);
                 // Enpassant discovered check
-                if (get_psuedo_attackers(king_sq, ~board.side))
+                if (get_psuedo_attackers(king_sq, !board.side))
                     attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                 // If enpassant captures or blocks a checker
                 if (!((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
@@ -604,9 +623,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             } else {
                 POP_BIT(board.bitboards[14], board.enpassant + 8);
                 // Enpassant discovered check
-                if (get_psuedo_attackers(king_sq, ~board.side))
+                if (get_psuedo_attackers(king_sq, !board.side))
                     attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
-                // If enpassant captures or blocks a checker
+                    // If enpassant captures or blocks a checker
                 if (!((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
                     attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                 SET_BIT(board.bitboards[14], board.enpassant + 8);
@@ -619,19 +638,20 @@ void generate_moves(MOVE_LIST_T *move_list) {
         // Pinned piece movement
         if ((1ULL << from_sq) & pinned_pieces)
             attack_bb &= pinned_movement[i];
-
+        
         while (attack_bb) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if (to_sq >= a8) {
-                add_move(move_list, from_sq, to_sq, knight_promo_capture);
-                add_move(move_list, from_sq, to_sq, bishop_promo_capture);
-                add_move(move_list, from_sq, to_sq, rook_promo_capture);
-                add_move(move_list, from_sq, to_sq, queen_promo_capture);
+                add_move(move_list, from_sq, to_sq, knight_promo_capture, 0);
+                add_move(move_list, from_sq, to_sq, bishop_promo_capture, 0);
+                add_move(move_list, from_sq, to_sq, rook_promo_capture, 0);
+                add_move(move_list, from_sq, to_sq, queen_promo_capture, 0);
             } else if (to_sq == board.enpassant) {
-                add_move(move_list, from_sq, to_sq, ep_capture);
+                if ((from_sq >= a5 && from_sq <= h5) || (from_sq >= a4 && from_sq <= h4))
+                    add_move(move_list, from_sq, to_sq, ep_capture, board.enpassant);
             } else
-                add_move(move_list, from_sq, to_sq, capture);
+                add_move(move_list, from_sq, to_sq, capture, 0);
         }
     }
 
@@ -652,9 +672,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture);
+                add_move(move_list, from_sq, to_sq, capture, 0);
             else
-                add_move(move_list, from_sq, to_sq, quiet);
+                add_move(move_list, from_sq, to_sq, quiet, 0);
         }
     }
 
@@ -682,9 +702,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture);
+                add_move(move_list, from_sq, to_sq, capture, 0);
             else
-                add_move(move_list, from_sq, to_sq, quiet);
+                add_move(move_list, from_sq, to_sq, quiet, 0);
         }
     }
 
@@ -712,9 +732,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture);
+                add_move(move_list, from_sq, to_sq, capture, 0);
             else
-                add_move(move_list, from_sq, to_sq, quiet);
+                add_move(move_list, from_sq, to_sq, quiet, 0);
         }
     }
 
@@ -742,29 +762,305 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture);
+                add_move(move_list, from_sq, to_sq, capture, 0);
             else
-                add_move(move_list, from_sq, to_sq, quiet);
+                add_move(move_list, from_sq, to_sq, quiet, 0);
         }
     }
 }
 
-void make_move(uint16_t move) {
+void make_move(uint32_t *move_reference) {
+    uint32_t move = *move_reference;
     /*
-    Things to consider:
-    1. Update castling rights
-    2. Update enpassant square
+    1. Move the piece to the new square.
+    2. Handle capt
+    3. Handle promo
+    4. Handle castle
+    5. Update castling rights
+    6. Update enpassant
     */
+
+    // Step 1.
+
+    // Find piece bitboard
+    int piece = -1;
+    for (int bb = p; bb <= K; bb++) {
+        if ((1ULL << GET_FROM(move)) & board.bitboards[bb]) {
+            piece = bb;
+            break;
+        }
+    }
+
+    // Move the piece
+    POP_BIT(board.bitboards[piece], GET_FROM(move));
+    SET_BIT(board.bitboards[piece], GET_TO(move));
+
+    // Step 2.
+    
+    if (GET_CODE(move) == capture || GET_CODE(move) >= knight_promo_capture) {
+        for (int bb = p; bb <= K; bb++) {
+            if (bb == piece) continue;
+            if ((1ULL << GET_TO(move)) & board.bitboards[bb]) {
+                POP_BIT(board.bitboards[bb], GET_TO(move));
+                *move_reference |= (bb << 16);
+                break;
+            }
+        }
+    }
+
+
+    if (GET_CODE(move) == ep_capture) {
+        if (board.side == white)
+            POP_BIT(board.bitboards[p], board.enpassant - 8);
+        else
+            POP_BIT(board.bitboards[P], board.enpassant + 8);
+    }
+
+    // Step 3.
+
+    if (GET_CODE(move) == knight_promo || GET_CODE(move) == knight_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[P], GET_TO(move));
+            SET_BIT(board.bitboards[N], GET_TO(move));
+        } else {
+            POP_BIT(board.bitboards[p], GET_TO(move));
+            SET_BIT(board.bitboards[n], GET_TO(move));
+        }
+    }
+
+    if (GET_CODE(move) == bishop_promo || GET_CODE(move) == bishop_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[P], GET_TO(move));
+            SET_BIT(board.bitboards[B], GET_TO(move));
+        } else {
+            POP_BIT(board.bitboards[p], GET_TO(move));
+            SET_BIT(board.bitboards[b], GET_TO(move));
+        }
+    }
+
+    if (GET_CODE(move) == rook_promo || GET_CODE(move) == rook_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[P], GET_TO(move));
+            SET_BIT(board.bitboards[R], GET_TO(move));
+        } else {
+            POP_BIT(board.bitboards[p], GET_TO(move));
+            SET_BIT(board.bitboards[r], GET_TO(move));
+        }
+    }
+
+    if (GET_CODE(move) == queen_promo || GET_CODE(move) == queen_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[P], GET_TO(move));
+            SET_BIT(board.bitboards[Q], GET_TO(move));
+        } else {
+            POP_BIT(board.bitboards[p], GET_TO(move));
+            SET_BIT(board.bitboards[q], GET_TO(move));
+        }
+    }
+
+    // Step 4.
+
+    if (GET_CODE(move) == king_castle) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[K], GET_FROM(move));
+            SET_BIT(board.bitboards[K], GET_TO(move));
+            POP_BIT(board.bitboards[R], h1);
+            SET_BIT(board.bitboards[R], f1);
+        } else {
+            POP_BIT(board.bitboards[k], GET_FROM(move));
+            SET_BIT(board.bitboards[k], GET_TO(move));
+            POP_BIT(board.bitboards[r], h8);
+            SET_BIT(board.bitboards[r], f8);
+        }
+    }
+
+    if (GET_CODE(move) == queen_castle) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[K], GET_FROM(move));
+            SET_BIT(board.bitboards[K], GET_TO(move));
+            POP_BIT(board.bitboards[R], a1);
+            SET_BIT(board.bitboards[R], d1);
+        } else {
+            POP_BIT(board.bitboards[k], GET_FROM(move));
+            SET_BIT(board.bitboards[k], GET_TO(move));
+            POP_BIT(board.bitboards[r], a8);
+            SET_BIT(board.bitboards[r], d8);
+        }
+    }
+
+    // Step 5.
+
+    int castling_encoder[64] = {
+        13, 15, 15, 15, 12, 15, 15, 14,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+         7, 15, 15, 15,  3, 15, 15, 11
+    };
+
+    board.castling &= castling_encoder[GET_FROM(move)];
+    board.castling &= castling_encoder[GET_TO(move)];
+
+    // Step 6.
+    if (GET_CODE(move) == dbl_pawn) {
+        if (board.side == white)
+            board.enpassant = GET_TO(move) - 8;
+        else
+            board.enpassant = GET_TO(move) + 8;
+    } else {
+        board.enpassant = -1;
+    }
+
+
+    // Update everything else
+    board.side ^= 1;
+    board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
+    board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
+    board.bitboards[14] = board.bitboards[12] | board.bitboards[13];
 }
 
-void print_move(uint16_t move) {
+void unmake_move(uint32_t move) {
+    /*
+    1. Move the piece back to the old square
+    2. handle un-capt
+    3. Handle un-promo
+    4. Handle un-castle
+    5. undo castling rights
+    6. undo enpassant
+    */
+
+    board.side ^= 1;
+
+    // Step 1.
+    
+    // Find piece bitboard
+    int piece = -1;
+    for (int bb = p; bb <= K; bb++) {
+        if ((1ULL << GET_TO(move)) & board.bitboards[bb]) {
+            piece = bb;
+            break;
+        }
+    }
+
+    // Move the piece back
+    POP_BIT(board.bitboards[piece], GET_TO(move));
+    SET_BIT(board.bitboards[piece], GET_FROM(move));
+
+    // Step 2.
+    if (GET_CODE(move) == capture || GET_CODE(move) >= knight_promo_capture)
+        SET_BIT(board.bitboards[GET_MOD(move)], GET_TO(move));
+
+    // Step 3.
+
+    if (GET_CODE(move) == knight_promo || GET_CODE(move) == knight_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[N], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[P], GET_FROM(move));
+        } else {
+            POP_BIT(board.bitboards[n], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[p], GET_FROM(move));
+        }
+    }
+
+    if (GET_CODE(move) == bishop_promo || GET_CODE(move) == bishop_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[B], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[P], GET_FROM(move));
+        } else {
+            POP_BIT(board.bitboards[b], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[p], GET_FROM(move));
+        }
+    }
+
+    if (GET_CODE(move) == rook_promo || GET_CODE(move) == rook_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[R], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[P], GET_FROM(move));
+        } else {
+            POP_BIT(board.bitboards[r], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[p], GET_FROM(move));
+        }
+    }
+
+    if (GET_CODE(move) == queen_promo || GET_CODE(move) == queen_promo_capture) {
+        if (board.side == white) {
+            POP_BIT(board.bitboards[Q], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[P], GET_FROM(move));
+        } else {
+            POP_BIT(board.bitboards[q], GET_TO(move));
+            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
+            SET_BIT(board.bitboards[p], GET_FROM(move));
+        }
+    }
+
+    // Step 4.
+
+    if (GET_CODE(move) == king_castle) {
+        if (board.side == white) {
+            SET_BIT(board.bitboards[K], GET_FROM(move));
+            POP_BIT(board.bitboards[K], GET_TO(move));
+            SET_BIT(board.bitboards[R], h1);
+            POP_BIT(board.bitboards[R], f1);
+        } else {
+            SET_BIT(board.bitboards[k], GET_FROM(move));
+            POP_BIT(board.bitboards[k], GET_TO(move));
+            SET_BIT(board.bitboards[r], h8);
+            POP_BIT(board.bitboards[r], f8);
+        }
+    }
+
+    if (GET_CODE(move) == queen_castle) {
+        if (board.side == white) {
+            SET_BIT(board.bitboards[K], GET_FROM(move));
+            POP_BIT(board.bitboards[K], GET_TO(move));
+            SET_BIT(board.bitboards[R], a1);
+            POP_BIT(board.bitboards[R], d1);
+        } else {
+            SET_BIT(board.bitboards[k], GET_FROM(move));
+            POP_BIT(board.bitboards[k], GET_TO(move));
+            SET_BIT(board.bitboards[r], a8);
+            POP_BIT(board.bitboards[r], d8);
+        }
+    }
+
+    // Step 5.
+    if (GET_CODE(move) == king_castle || GET_CODE(move) == queen_castle)
+        board.castling = GET_MOD(move);
+
+    // Step 6.
+    if (GET_CODE(move) == ep_capture) {
+            board.enpassant = GET_MOD(move);
+            if (board.side == white)
+                SET_BIT(board.bitboards[p], board.enpassant - 8);
+            else
+                SET_BIT(board.bitboards[P], board.enpassant + 8);
+        }
+        
+    if (board.enpassant == 0);
+        board.enpassant = -1;
+
+    board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
+    board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
+    board.bitboards[14] = board.bitboards[12] | board.bitboards[13];    
+}
+
+void print_move(uint32_t move) {
     printf("%s ", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
          'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8)});
-    printf("%d\n", (move >> 12));
+    // printf("%d", (move >> 12));
 }
 
-void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
-    uint16_t move = UINT16_C(from | (to << 6) | (code << 12));
-    move_list->moves[move_list->count] = move;
-    move_list->count++;
+void add_move(MOVE_LIST_T *move_list, int from, int to, int code, int mod) {
+    uint32_t move = (from | (to << 6) | (code << 12) | (mod << 16));
+    move_list->moves[move_list->count++] = move;
 }

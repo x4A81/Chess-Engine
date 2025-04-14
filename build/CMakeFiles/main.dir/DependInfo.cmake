@@ -8,6 +8,8 @@ set(CMAKE_DEPENDS_CHECK_C
   "/workspaces/Chess-Engine/src/board.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/board.c.o"
   "/workspaces/Chess-Engine/src/move.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/move.c.o"
   "/workspaces/Chess-Engine/src/rng.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/rng.c.o"
+  "/workspaces/Chess-Engine/src/uci.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/src/uci.c.o"
+  "/workspaces/Chess-Engine/tests/test.c" "/workspaces/Chess-Engine/build/CMakeFiles/main.dir/tests/test.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

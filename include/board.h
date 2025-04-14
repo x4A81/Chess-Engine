@@ -52,10 +52,10 @@ typedef struct BOARD_T {
     board.fullmove = 1; \
 } while (0)
 
-#define SAVE_BOARD() (BOARDS_T saved_board = board)
-#define RESTORE_BOARD() (board = saved_board)
-
 extern BOARD_T board;
+
+#define SAVE_BOARD() BOARD_T saved_board = board
+#define RESTORE_BOARD() board = saved_board
 
 void print_board();
 void print_bitboard(uint64_t bitboard);

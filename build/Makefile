@@ -231,6 +231,60 @@ src/rng.c.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/rng.c.s
 .PHONY : src/rng.c.s
 
+src/uci.o: src/uci.c.o
+
+.PHONY : src/uci.o
+
+# target to build an object file
+src/uci.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/uci.c.o
+.PHONY : src/uci.c.o
+
+src/uci.i: src/uci.c.i
+
+.PHONY : src/uci.i
+
+# target to preprocess a source file
+src/uci.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/uci.c.i
+.PHONY : src/uci.c.i
+
+src/uci.s: src/uci.c.s
+
+.PHONY : src/uci.s
+
+# target to generate assembly for a file
+src/uci.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/uci.c.s
+.PHONY : src/uci.c.s
+
+tests/test.o: tests/test.c.o
+
+.PHONY : tests/test.o
+
+# target to build an object file
+tests/test.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/tests/test.c.o
+.PHONY : tests/test.c.o
+
+tests/test.i: tests/test.c.i
+
+.PHONY : tests/test.i
+
+# target to preprocess a source file
+tests/test.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/tests/test.c.i
+.PHONY : tests/test.c.i
+
+tests/test.s: tests/test.c.s
+
+.PHONY : tests/test.s
+
+# target to generate assembly for a file
+tests/test.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/tests/test.c.s
+.PHONY : tests/test.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -252,6 +306,12 @@ help:
 	@echo "... src/rng.o"
 	@echo "... src/rng.i"
 	@echo "... src/rng.s"
+	@echo "... src/uci.o"
+	@echo "... src/uci.i"
+	@echo "... src/uci.s"
+	@echo "... tests/test.o"
+	@echo "... tests/test.i"
+	@echo "... tests/test.s"
 .PHONY : help
 
 

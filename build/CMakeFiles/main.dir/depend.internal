@@ -5,6 +5,7 @@ CMakeFiles/main.dir/main.c.o
  /workspaces/Chess-Engine/include/board.h
  /workspaces/Chess-Engine/include/move.h
  /workspaces/Chess-Engine/main.c
+ /workspaces/Chess-Engine/tests/test.h
 CMakeFiles/main.dir/src/board.c.o
  /workspaces/Chess-Engine/include/board.h
  /workspaces/Chess-Engine/src/board.c
@@ -16,3 +17,10 @@ CMakeFiles/main.dir/src/move.c.o
 CMakeFiles/main.dir/src/rng.c.o
  /workspaces/Chess-Engine/include/rng.h
  /workspaces/Chess-Engine/src/rng.c
+CMakeFiles/main.dir/src/uci.c.o
+ /workspaces/Chess-Engine/src/uci.c
+CMakeFiles/main.dir/tests/test.c.o
+ /workspaces/Chess-Engine/include/board.h
+ /workspaces/Chess-Engine/include/move.h
+ /workspaces/Chess-Engine/tests/test.c
+ /workspaces/Chess-Engine/tests/test.h
