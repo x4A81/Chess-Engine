@@ -19,6 +19,8 @@ CMakeFiles/main.dir/src/rng.c.o: ../src/rng.c
 
 CMakeFiles/main.dir/src/uci.c.o: ../src/uci.c
 
+CMakeFiles/main.dir/src/zobrist.c.o: ../src/zobrist.c
+
 CMakeFiles/main.dir/tests/test.c.o: ../include/board.h
 CMakeFiles/main.dir/tests/test.c.o: ../include/move.h
 CMakeFiles/main.dir/tests/test.c.o: ../tests/test.c

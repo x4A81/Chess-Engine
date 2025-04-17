@@ -19,6 +19,8 @@ CMakeFiles/main.dir/src/rng.c.o
  /workspaces/Chess-Engine/src/rng.c
 CMakeFiles/main.dir/src/uci.c.o
  /workspaces/Chess-Engine/src/uci.c
+CMakeFiles/main.dir/src/zobrist.c.o
+ /workspaces/Chess-Engine/src/zobrist.c
 CMakeFiles/main.dir/tests/test.c.o
  /workspaces/Chess-Engine/include/board.h
  /workspaces/Chess-Engine/include/move.h

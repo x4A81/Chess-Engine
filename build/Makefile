@@ -258,6 +258,33 @@ src/uci.c.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/uci.c.s
 .PHONY : src/uci.c.s
 
+src/zobrist.o: src/zobrist.c.o
+
+.PHONY : src/zobrist.o
+
+# target to build an object file
+src/zobrist.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/zobrist.c.o
+.PHONY : src/zobrist.c.o
+
+src/zobrist.i: src/zobrist.c.i
+
+.PHONY : src/zobrist.i
+
+# target to preprocess a source file
+src/zobrist.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/zobrist.c.i
+.PHONY : src/zobrist.c.i
+
+src/zobrist.s: src/zobrist.c.s
+
+.PHONY : src/zobrist.s
+
+# target to generate assembly for a file
+src/zobrist.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/zobrist.c.s
+.PHONY : src/zobrist.c.s
+
 tests/test.o: tests/test.c.o
 
 .PHONY : tests/test.o
@@ -309,6 +336,9 @@ help:
 	@echo "... src/uci.o"
 	@echo "... src/uci.i"
 	@echo "... src/uci.s"
+	@echo "... src/zobrist.o"
+	@echo "... src/zobrist.i"
+	@echo "... src/zobrist.s"
 	@echo "... tests/test.o"
 	@echo "... tests/test.i"
 	@echo "... tests/test.s"

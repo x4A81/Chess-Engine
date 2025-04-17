@@ -10,7 +10,6 @@
 #define GET_FROM(move) (move & 0b111111)
 #define GET_TO(move) ((move >> 6) & 0b111111)
 #define GET_CODE(move) ((move >> 12) & 0b1111)
-#define GET_MOD(move) ((move >> 16) & 0b111111)
 
 typedef enum MOVE_TYPES {
     quiet, dbl_pawn, king_castle, queen_castle, capture, ep_capture,
@@ -18,8 +17,8 @@ typedef enum MOVE_TYPES {
     knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
 } MOVE_TYPES;
 
-uint64_t pawn_move_table[64][2] = { { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x1, 0x1010000 }, { 0x2, 0x2020000 }, { 0x4, 0x4040000 }, { 0x8, 0x8080000 }, { 0x10, 0x10100000 }, { 0x20, 0x20200000 }, { 0x40, 0x40400000 }, { 0x80, 0x80800000 }, { 0x100, 0x1000000 }, { 0x200, 0x2000000 }, { 0x400, 0x4000000 }, { 0x800, 0x8000000 }, { 0x1000, 0x10000000 }, { 0x2000, 0x20000000 }, { 0x4000, 0x40000000 }, { 0x8000, 0x80000000 }, { 0x10000, 0x100000000 }, { 0x20000, 0x200000000 }, { 0x40000, 0x400000000 }, { 0x80000, 0x800000000 }, { 0x100000, 0x1000000000 }, { 0x200000, 0x2000000000 }, { 0x400000, 0x4000000000 }, { 0x800000, 0x8000000000 }, { 0x1000000, 0x10000000000 }, { 0x2000000, 0x20000000000 }, { 0x4000000, 0x40000000000 }, { 0x8000000, 0x80000000000 }, { 0x10000000, 0x100000000000 }, { 0x20000000, 0x200000000000 }, { 0x40000000, 0x400000000000 }, { 0x80000000, 0x800000000000 }, { 0x100000000, 0x1000000000000 }, { 0x200000000, 0x2000000000000 }, { 0x400000000, 0x4000000000000 }, { 0x800000000, 0x8000000000000 }, { 0x1000000000, 0x10000000000000 }, { 0x2000000000, 0x20000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x8000000000, 0x80000000000000 }, { 0x10100000000, 0x100000000000000 }, { 0x20200000000, 0x200000000000000 }, { 0x40400000000, 0x400000000000000 }, { 0x80800000000, 0x800000000000000 }, { 0x101000000000, 0x1000000000000000 }, { 0x202000000000, 0x2000000000000000 }, { 0x404000000000, 0x4000000000000000 }, { 0x808000000000, 0x8000000000000000 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, };
-uint64_t pawn_attack_table[64][2] = { { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x2, 0x20000 }, { 0x5, 0x50000 }, { 0xa, 0xa0000 }, { 0x14, 0x140000 }, { 0x28, 0x280000 }, { 0x50, 0x500000 }, { 0xa0, 0xa00000 }, { 0x40, 0x400000 }, { 0x200, 0x2000000 }, { 0x500, 0x5000000 }, { 0xa00, 0xa000000 }, { 0x1400, 0x14000000 }, { 0x2800, 0x28000000 }, { 0x5000, 0x50000000 }, { 0xa000, 0xa0000000 }, { 0x4000, 0x40000000 }, { 0x20000, 0x200000000 }, { 0x50000, 0x500000000 }, { 0xa0000, 0xa00000000 }, { 0x140000, 0x1400000000 }, { 0x280000, 0x2800000000 }, { 0x500000, 0x5000000000 }, { 0xa00000, 0xa000000000 }, { 0x400000, 0x4000000000 }, { 0x2000000, 0x20000000000 }, { 0x5000000, 0x50000000000 }, { 0xa000000, 0xa0000000000 }, { 0x14000000, 0x140000000000 }, { 0x28000000, 0x280000000000 }, { 0x50000000, 0x500000000000 }, { 0xa0000000, 0xa00000000000 }, { 0x40000000, 0x400000000000 }, { 0x200000000, 0x2000000000000 }, { 0x500000000, 0x5000000000000 }, { 0xa00000000, 0xa000000000000 }, { 0x1400000000, 0x14000000000000 }, { 0x2800000000, 0x28000000000000 }, { 0x5000000000, 0x50000000000000 }, { 0xa000000000, 0xa0000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x20000000000, 0x200000000000000 }, { 0x50000000000, 0x500000000000000 }, { 0xa0000000000, 0xa00000000000000 }, { 0x140000000000, 0x1400000000000000 }, { 0x280000000000, 0x2800000000000000 }, { 0x500000000000, 0x5000000000000000 }, { 0xa00000000000, 0xa000000000000000 }, { 0x400000000000, 0x4000000000000000 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, };
+uint64_t pawn_move_table[64][2] = { { 0x0, 0x100 }, { 0x0, 0x200 }, { 0x0, 0x400 }, { 0x0, 0x800 }, { 0x0, 0x1000 }, { 0x0, 0x2000 }, { 0x0, 0x4000 }, { 0x0, 0x8000 }, { 0x1, 0x1010000 }, { 0x2, 0x2020000 }, { 0x4, 0x4040000 }, { 0x8, 0x8080000 }, { 0x10, 0x10100000 }, { 0x20, 0x20200000 }, { 0x40, 0x40400000 }, { 0x80, 0x80800000 }, { 0x100, 0x1000000 }, { 0x200, 0x2000000 }, { 0x400, 0x4000000 }, { 0x800, 0x8000000 }, { 0x1000, 0x10000000 }, { 0x2000, 0x20000000 }, { 0x4000, 0x40000000 }, { 0x8000, 0x80000000 }, { 0x10000, 0x100000000 }, { 0x20000, 0x200000000 }, { 0x40000, 0x400000000 }, { 0x80000, 0x800000000 }, { 0x100000, 0x1000000000 }, { 0x200000, 0x2000000000 }, { 0x400000, 0x4000000000 }, { 0x800000, 0x8000000000 }, { 0x1000000, 0x10000000000 }, { 0x2000000, 0x20000000000 }, { 0x4000000, 0x40000000000 }, { 0x8000000, 0x80000000000 }, { 0x10000000, 0x100000000000 }, { 0x20000000, 0x200000000000 }, { 0x40000000, 0x400000000000 }, { 0x80000000, 0x800000000000 }, { 0x100000000, 0x1000000000000 }, { 0x200000000, 0x2000000000000 }, { 0x400000000, 0x4000000000000 }, { 0x800000000, 0x8000000000000 }, { 0x1000000000, 0x10000000000000 }, { 0x2000000000, 0x20000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x8000000000, 0x80000000000000 }, { 0x10100000000, 0x100000000000000 }, { 0x20200000000, 0x200000000000000 }, { 0x40400000000, 0x400000000000000 }, { 0x80800000000, 0x800000000000000 }, { 0x101000000000, 0x1000000000000000 }, { 0x202000000000, 0x2000000000000000 }, { 0x404000000000, 0x4000000000000000 }, { 0x808000000000, 0x8000000000000000 }, { 0x1000000000000, 0x0 }, { 0x2000000000000, 0x0 }, { 0x4000000000000, 0x0 }, { 0x8000000000000, 0x0 }, { 0x10000000000000, 0x0 }, { 0x20000000000000, 0x0 }, { 0x40000000000000, 0x0 }, { 0x80000000000000, 0x0 } };
+uint64_t pawn_attack_table[64][2] = { { 0x0, 0x200 }, { 0x0, 0x500 }, { 0x0, 0xa00 }, { 0x0, 0x1400 }, { 0x0, 0x2800 }, { 0x0, 0x5000 }, { 0x0, 0xa000 }, { 0x0, 0x4000 }, { 0x2, 0x20000 }, { 0x5, 0x50000 }, { 0xa, 0xa0000 }, { 0x14, 0x140000 }, { 0x28, 0x280000 }, { 0x50, 0x500000 }, { 0xa0, 0xa00000 }, { 0x40, 0x400000 }, { 0x200, 0x2000000 }, { 0x500, 0x5000000 }, { 0xa00, 0xa000000 }, { 0x1400, 0x14000000 }, { 0x2800, 0x28000000 }, { 0x5000, 0x50000000 }, { 0xa000, 0xa0000000 }, { 0x4000, 0x40000000 }, { 0x20000, 0x200000000 }, { 0x50000, 0x500000000 }, { 0xa0000, 0xa00000000 }, { 0x140000, 0x1400000000 }, { 0x280000, 0x2800000000 }, { 0x500000, 0x5000000000 }, { 0xa00000, 0xa000000000 }, { 0x400000, 0x4000000000 }, { 0x2000000, 0x20000000000 }, { 0x5000000, 0x50000000000 }, { 0xa000000, 0xa0000000000 }, { 0x14000000, 0x140000000000 }, { 0x28000000, 0x280000000000 }, { 0x50000000, 0x500000000000 }, { 0xa0000000, 0xa00000000000 }, { 0x40000000, 0x400000000000 }, { 0x200000000, 0x2000000000000 }, { 0x500000000, 0x5000000000000 }, { 0xa00000000, 0xa000000000000 }, { 0x1400000000, 0x14000000000000 }, { 0x2800000000, 0x28000000000000 }, { 0x5000000000, 0x50000000000000 }, { 0xa000000000, 0xa0000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x20000000000, 0x200000000000000 }, { 0x50000000000, 0x500000000000000 }, { 0xa0000000000, 0xa00000000000000 }, { 0x140000000000, 0x1400000000000000 }, { 0x280000000000, 0x2800000000000000 }, { 0x500000000000, 0x5000000000000000 }, { 0xa00000000000, 0xa000000000000000 }, { 0x400000000000, 0x4000000000000000 }, { 0x2000000000000, 0x0 }, { 0x5000000000000, 0x0 }, { 0xa000000000000, 0x0 }, { 0x14000000000000, 0x0 }, { 0x28000000000000, 0x0 }, { 0x50000000000000, 0x0 }, { 0xa0000000000000, 0x0 }, { 0x40000000000000, 0x0 } };
 uint64_t knight_move_table[64] = { 0x20400, 0x50800, 0xa1100, 0x142200, 0x284400, 0x508800, 0xa01000, 0x402000, 0x2040004, 0x5080008, 0xa110011, 0x14220022, 0x28440044, 0x50880088, 0xa0100010, 0x40200020, 0x204000402, 0x508000805, 0xa1100110a, 0x1422002214, 0x2844004428, 0x5088008850, 0xa0100010a0, 0x4020002040, 0x20400040200, 0x50800080500, 0xa1100110a00, 0x142200221400, 0x284400442800, 0x508800885000, 0xa0100010a000, 0x402000204000, 0x2040004020000, 0x5080008050000, 0xa1100110a0000, 0x14220022140000, 0x28440044280000, 0x50880088500000, 0xa0100010a00000, 0x40200020400000, 0x204000402000000, 0x508000805000000, 0xa1100110a000000, 0x1422002214000000, 0x2844004428000000, 0x5088008850000000, 0xa0100010a0000000, 0x4020002040000000, 0x400040200000000, 0x800080500000000, 0x1100110a00000000, 0x2200221400000000, 0x4400442800000000, 0x8800885000000000, 0x100010a000000000, 0x2000204000000000, 0x4020000000000, 0x8050000000000, 0x110a0000000000, 0x22140000000000, 0x44280000000000, 0x88500000000000, 0x10a00000000000, 0x20400000000000 };
 uint64_t king_move_table[64] = { 0x302, 0x705, 0xe0a, 0x1c14, 0x3828, 0x7050, 0xe0a0, 0xc040, 0x30203, 0x70507, 0xe0a0e, 0x1c141c, 0x382838, 0x705070, 0xe0a0e0, 0xc040c0, 0x3020300, 0x7050700, 0xe0a0e00, 0x1c141c00, 0x38283800, 0x70507000, 0xe0a0e000, 0xc040c000, 0x302030000, 0x705070000, 0xe0a0e0000, 0x1c141c0000, 0x3828380000, 0x7050700000, 0xe0a0e00000, 0xc040c00000, 0x30203000000, 0x70507000000, 0xe0a0e000000, 0x1c141c000000, 0x382838000000, 0x705070000000, 0xe0a0e0000000, 0xc040c0000000, 0x3020300000000, 0x7050700000000, 0xe0a0e00000000, 0x1c141c00000000, 0x38283800000000, 0x70507000000000, 0xe0a0e000000000, 0xc040c000000000, 0x302030000000000, 0x705070000000000, 0xe0a0e0000000000, 0x1c141c0000000000, 0x3828380000000000, 0x7050700000000000, 0xe0a0e00000000000, 0xc040c00000000000, 0x203000000000000, 0x507000000000000, 0xa0e000000000000, 0x141c000000000000, 0x2838000000000000, 0x5070000000000000, 0xa0e0000000000000, 0x40c0000000000000 };
 
@@ -27,10 +26,6 @@ void generate_pawn_move_table() {
     uint64_t bb;
     printf("{ ");
     for (int sq = 0; sq < 64; sq++) {
-        if (sq < a2 || sq >= a8) {
-            printf("{ 0x0, 0x0 }, ");
-            continue;
-        }
 
         bb = (1ULL << sq);
 
@@ -62,18 +57,14 @@ void generate_pawn_move_table() {
 
         printf("{ 0x%" PRIx64 ", 0x%" PRIx64 " }, ", pawn_move_table[sq][0], pawn_move_table[sq][1]);
     }
-
+    
     printf("};\n{ ");
-
+    
     for (int sq = 0; sq < 64; sq++) {
-        if (sq < a2 || sq >= a8) {
-            printf("{ 0x0, 0x0 }, ");
-            continue;
-        }
         printf("{ 0x%" PRIx64 ", 0x%" PRIx64 " }, ", pawn_attack_table[sq][0], pawn_attack_table[sq][1]);
     }
 
-    printf("};");
+    printf("};\n");
 }
 
 void generate_knight_move_table() {
@@ -318,7 +309,6 @@ uint64_t queen_moves(int sq, uint64_t bb) {
 
 uint64_t get_psuedo_attackers(int sq, int side) {
     uint64_t bb, attack_bb;
-    int is_attacked = 0;
 
     // Attacks by pawns
     bb = (side == white) ? pawn_attack_table[sq][black] : pawn_attack_table[sq][white];
@@ -339,11 +329,6 @@ uint64_t get_psuedo_attackers(int sq, int side) {
     // Attacks by opposing king
     bb = (side == white) ? king_move_table[sq] : king_move_table[sq];
     attack_bb |= bb & ((side == white) ? board.bitboards[K] : board.bitboards[k]);
-
-    // Enpassant
-    if (board.enpassant == sq)
-        attack_bb |= 1ULL << sq; // Set the sq to 1 if it is the enpassant target.
-        // TODO: add better check for enpassant attackers
 
     return attack_bb; // If the attack board is empty then the square is not attacked
 }
@@ -373,7 +358,7 @@ void generate_moves(MOVE_LIST_T *move_list) {
     
     // Set the attackbb to the king moves that don't capture friendly pieces.
     attack_bb = king_move_table[king_sq] & ~board.bitboards[12+board.side];
-    
+
     // Pop bit from all bitboard, deals with x-ray attacks.
     POP_BIT(board.bitboards[14], king_sq); 
     while (attack_bb) {
@@ -389,7 +374,7 @@ void generate_moves(MOVE_LIST_T *move_list) {
         if ((1ULL << to_sq) & board.bitboards[13-board.side])
             code = capture;
 
-        add_move(move_list, king_sq, to_sq, code, 0);
+        add_move(move_list, king_sq, to_sq, code);
     }
 
     SET_BIT(board.bitboards[14], king_sq);
@@ -400,6 +385,7 @@ void generate_moves(MOVE_LIST_T *move_list) {
 
     // If in double check then only king moves are legal
     if (pop_count(checkers) > 1) return;
+
     /*
     If single check:
     1. Move king (already done)
@@ -471,45 +457,56 @@ void generate_moves(MOVE_LIST_T *move_list) {
     int rays_to_king = 0;
 
     // Calculate rays from the king
-    king_rook_rays = rook_moves(king_sq, board.bitboards[14]);
-    king_bishop_rays = bishop_moves(king_sq, board.bitboards[14]);
+    king_rook_rays = rook_moves(king_sq, board.bitboards[13 - board.side]);
+    king_bishop_rays = bishop_moves(king_sq, board.bitboards[13 - board.side]);
 
-    attack_bb = attacking_bishops;
+    attack_bb = attacking_bishops & king_bishop_rays;
     while (attack_bb) {
         int slider = ls1b(attack_bb);
-        uint64_t ray = bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
-        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
-            pinned_pieces |= ray & board.bitboards[12 + board.side];
-            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
+        uint64_t attacking_ray = bishop_moves(slider, (1ULL << king_sq)) & king_bishop_rays;
+        if (pop_count(board.bitboards[13 - board.side] & attacking_ray) == 0) {
+            if (pop_count(board.bitboards[12 + board.side] & attacking_ray) == 1) {
+                pinned_pieces |= board.bitboards[12 + board.side] & attacking_ray;
+                pinned_movement[rays_to_king++] = attacking_ray | (1ULL << slider);
+            }
         }
 
         POP_BIT(attack_bb, slider);
     }
 
-    attack_bb = attacking_rooks;
+    attack_bb = attacking_rooks & king_rook_rays;
     while (attack_bb) {
         int slider = ls1b(attack_bb);
-        uint64_t ray = rook_moves(slider, board.bitboards[14]) & king_rook_rays;
-        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
-            pinned_pieces |= ray & board.bitboards[12 + board.side];
-            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
+        uint64_t attacking_ray = rook_moves(slider, (1ULL << king_sq)) & king_rook_rays;
+        if (pop_count(board.bitboards[13 - board.side] & attacking_ray) == 0) {
+            if (pop_count(board.bitboards[12 + board.side] & attacking_ray) == 1) {
+                pinned_pieces |= board.bitboards[12 + board.side] & attacking_ray;
+                pinned_movement[rays_to_king++] = attacking_ray | (1ULL << slider);
+            }
         }
 
         POP_BIT(attack_bb, slider);
     }
 
-    attack_bb = attacking_queens;
+    attack_bb = attacking_queens & (king_bishop_rays | king_rook_rays);
     while (attack_bb) {
         int slider = ls1b(attack_bb);
-        uint64_t ray = 0ULL;
-        if (rook_moves(slider, board.bitboards[14]) & (1ULL << king_sq))
-            ray = rook_moves(slider, board.bitboards[14]) & king_rook_rays;
-        else
-            ray = bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
-        
-        if (pop_count(ray & board.bitboards[12 + board.side]) == 1) {
-            pinned_pieces |= ray & board.bitboards[12 + board.side];
-            pinned_movement[rays_to_king++] = ray & bishop_moves(king_sq, board.bitboards[13 - board.side]);
+        if (rook_moves(slider, (board.bitboards[13 - board.side] | (1ULL << king_sq))) & (1ULL << king_sq)) {
+            uint64_t attacking_ray = rook_moves(slider, (1ULL << king_sq)) & king_rook_rays;
+            if (pop_count(board.bitboards[13 - board.side] & attacking_ray) == 0) {
+                if (pop_count(board.bitboards[12 + board.side] & attacking_ray) == 1) {
+                    pinned_pieces |= board.bitboards[12 + board.side] & attacking_ray;
+                    pinned_movement[rays_to_king++] = attacking_ray | (1ULL << slider);
+                }
+            }
+        } else {
+            uint64_t attacking_ray = bishop_moves(slider, (1ULL << king_sq)) & king_bishop_rays;
+        if (pop_count(board.bitboards[13 - board.side] & attacking_ray) == 0) {
+            if (pop_count(board.bitboards[12 + board.side] & attacking_ray) == 1) {
+                pinned_pieces |= board.bitboards[12 + board.side] & attacking_ray;
+                pinned_movement[rays_to_king++] = attacking_ray | (1ULL << slider);
+            }
+        }
         }
 
         POP_BIT(attack_bb, slider);
@@ -532,35 +529,34 @@ void generate_moves(MOVE_LIST_T *move_list) {
             if (board.castling & wkingside) {
                 if (!(board.bitboards[14] & ((1ULL << f1) | (1ULL << g1)))) {
                     if (!(get_psuedo_attackers(f1, !board.side) || get_psuedo_attackers(g1, !board.side)))
-                        add_move(move_list, e1, g1, king_castle, board.castling);
+                        add_move(move_list, e1, g1, king_castle);
                 }
             }
             
             if (board.castling & wqueenside) {
                 if (!(board.bitboards[14] & ((1ULL << d1) | (1ULL << c1) | (1ULL << b1)))) {
                     if (!(get_psuedo_attackers(d1, !board.side) || get_psuedo_attackers(c1, !board.side)))
-                        add_move(move_list, e1, c1, king_castle, board.castling);
+                        add_move(move_list, e1, c1, queen_castle);
                 }
             }
         } else {
             if (board.castling & bkingside) {
                 if (!(board.bitboards[14] & ((1ULL << f8) | (1ULL << g8)))) {
                     if (!(get_psuedo_attackers(f8, !board.side) || get_psuedo_attackers(g8, !board.side)))
-                        add_move(move_list, e8, g8, king_castle, board.castling);
+                        add_move(move_list, e8, g8, king_castle);
                 }
             }
             
             if (board.castling & bqueenside) {
                 if (!(board.bitboards[14] & ((1ULL << d8) | (1ULL << c8) | (1ULL << b8)))) {
                     if (!(get_psuedo_attackers(d8, !board.side) || get_psuedo_attackers(c8, !board.side)))
-                        add_move(move_list, e8, c8, king_castle, board.castling);
+                        add_move(move_list, e8, c8, queen_castle);
                 }
             }
         }
     }
     
     // Pawn moves
-
     if (board.side == white)
         piece_bb = board.bitboards[P];
     else
@@ -585,50 +581,58 @@ void generate_moves(MOVE_LIST_T *move_list) {
         while (attack_bb) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
-            if (to_sq >= a8) {
-                add_move(move_list, from_sq, to_sq, knight_promo, 0);
-                add_move(move_list, from_sq, to_sq, bishop_promo, 0);
-                add_move(move_list, from_sq, to_sq, queen_promo, 0);
-                add_move(move_list, from_sq, to_sq, rook_promo, 0);
+            if (to_sq >= a8 || to_sq <= h1) {
+                add_move(move_list, from_sq, to_sq, knight_promo);
+                add_move(move_list, from_sq, to_sq, bishop_promo);
+                add_move(move_list, from_sq, to_sq, queen_promo);
+                add_move(move_list, from_sq, to_sq, rook_promo);
             } else if (to_sq-from_sq == 16 || to_sq-from_sq == -16) {
                 if (board.side == white) {
                     if (!((1ULL << from_sq << 8) & board.bitboards[14]))
-                        add_move(move_list, from_sq, to_sq, dbl_pawn, 0);
+                        add_move(move_list, from_sq, to_sq, dbl_pawn);
                 } else {
                     if (!((1ULL << from_sq >> 8) & board.bitboards[14]))
-                        add_move(move_list, from_sq, to_sq, dbl_pawn, 0);
+                        add_move(move_list, from_sq, to_sq, dbl_pawn);
                 }
             } else {
-                add_move(move_list, from_sq, to_sq, quiet, 0);
+                add_move(move_list, from_sq, to_sq, quiet);
             }
         }
 
         // Deal with pawn attacks and promotions
         
         // Enpassant and enpassant discovered check
-        if (board.enpassant) {
+        if (board.enpassant != -1 && (pawn_attack_table[from_sq][board.side] & (1ULL << board.enpassant))) {
             // Enpassant discovered check
             POP_BIT(board.bitboards[14], from_sq);
 
             attack_bb = pawn_attack_table[from_sq][board.side] & (board.bitboards[13-board.side] | (1ULL << board.enpassant));
+            
             if (board.side == white) {
-                POP_BIT(board.bitboards[14], board.enpassant - 8);
-                // Enpassant discovered check
-                if (get_psuedo_attackers(king_sq, !board.side))
-                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
-                // If enpassant captures or blocks a checker
-                if (!((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
-                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
-                SET_BIT(board.bitboards[14], board.enpassant - 8);
-            } else {
-                POP_BIT(board.bitboards[14], board.enpassant + 8);
-                // Enpassant discovered check
-                if (get_psuedo_attackers(king_sq, !board.side))
-                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                // If in check, then discovered check doesn't matter
+                if (pop_count(checkers) == 0) {
+                    // Enpassant discovered check
+                    POP_BIT(board.bitboards[14], board.enpassant - 8);
+                    if (get_psuedo_attackers(king_sq, !board.side))
+                        attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                    SET_BIT(board.bitboards[14], board.enpassant - 8);
+                } else {
                     // If enpassant captures or blocks a checker
-                if (!((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
-                    attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
-                SET_BIT(board.bitboards[14], board.enpassant + 8);
+                    if (!((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                        attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                }
+            } else {
+                if (pop_count(checkers) == 0) {
+                    POP_BIT(board.bitboards[14], board.enpassant + 8);
+                    // Enpassant discovered check
+                    if (get_psuedo_attackers(king_sq, !board.side))
+                        attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                    SET_BIT(board.bitboards[14], board.enpassant + 8);
+                } else {
+                    // If enpassant captures or blocks a checker
+                    if (!((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                        attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
+                }
             }
 
             SET_BIT(board.bitboards[14], from_sq);
@@ -642,16 +646,16 @@ void generate_moves(MOVE_LIST_T *move_list) {
         while (attack_bb) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
-            if (to_sq >= a8) {
-                add_move(move_list, from_sq, to_sq, knight_promo_capture, 0);
-                add_move(move_list, from_sq, to_sq, bishop_promo_capture, 0);
-                add_move(move_list, from_sq, to_sq, rook_promo_capture, 0);
-                add_move(move_list, from_sq, to_sq, queen_promo_capture, 0);
+            if (to_sq >= a8 || to_sq <= h1) {
+                add_move(move_list, from_sq, to_sq, knight_promo_capture);
+                add_move(move_list, from_sq, to_sq, bishop_promo_capture);
+                add_move(move_list, from_sq, to_sq, rook_promo_capture);
+                add_move(move_list, from_sq, to_sq, queen_promo_capture);
             } else if (to_sq == board.enpassant) {
                 if ((from_sq >= a5 && from_sq <= h5) || (from_sq >= a4 && from_sq <= h4))
-                    add_move(move_list, from_sq, to_sq, ep_capture, board.enpassant);
+                    add_move(move_list, from_sq, to_sq, ep_capture);
             } else
-                add_move(move_list, from_sq, to_sq, capture, 0);
+                add_move(move_list, from_sq, to_sq, capture);
         }
     }
 
@@ -672,9 +676,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture, 0);
+                add_move(move_list, from_sq, to_sq, capture);
             else
-                add_move(move_list, from_sq, to_sq, quiet, 0);
+                add_move(move_list, from_sq, to_sq, quiet);
         }
     }
 
@@ -702,9 +706,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture, 0);
+                add_move(move_list, from_sq, to_sq, capture);
             else
-                add_move(move_list, from_sq, to_sq, quiet, 0);
+                add_move(move_list, from_sq, to_sq, quiet);
         }
     }
 
@@ -732,9 +736,9 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture, 0);
+                add_move(move_list, from_sq, to_sq, capture);
             else
-                add_move(move_list, from_sq, to_sq, quiet, 0);
+                add_move(move_list, from_sq, to_sq, quiet);
         }
     }
 
@@ -762,15 +766,14 @@ void generate_moves(MOVE_LIST_T *move_list) {
             to_sq = ls1b(attack_bb);
             POP_BIT(attack_bb, to_sq);
             if ((1ULL << to_sq) & board.bitboards[13-board.side])
-                add_move(move_list, from_sq, to_sq, capture, 0);
+                add_move(move_list, from_sq, to_sq, capture);
             else
-                add_move(move_list, from_sq, to_sq, quiet, 0);
+                add_move(move_list, from_sq, to_sq, quiet);
         }
     }
 }
 
-void make_move(uint32_t *move_reference) {
-    uint32_t move = *move_reference;
+void make_move(uint16_t move) {
     /*
     1. Move the piece to the new square.
     2. Handle capt
@@ -778,6 +781,7 @@ void make_move(uint32_t *move_reference) {
     4. Handle castle
     5. Update castling rights
     6. Update enpassant
+    7. Update everything else
     */
 
     // Step 1.
@@ -802,7 +806,6 @@ void make_move(uint32_t *move_reference) {
             if (bb == piece) continue;
             if ((1ULL << GET_TO(move)) & board.bitboards[bb]) {
                 POP_BIT(board.bitboards[bb], GET_TO(move));
-                *move_reference |= (bb << 16);
                 break;
             }
         }
@@ -862,13 +865,9 @@ void make_move(uint32_t *move_reference) {
 
     if (GET_CODE(move) == king_castle) {
         if (board.side == white) {
-            POP_BIT(board.bitboards[K], GET_FROM(move));
-            SET_BIT(board.bitboards[K], GET_TO(move));
             POP_BIT(board.bitboards[R], h1);
             SET_BIT(board.bitboards[R], f1);
         } else {
-            POP_BIT(board.bitboards[k], GET_FROM(move));
-            SET_BIT(board.bitboards[k], GET_TO(move));
             POP_BIT(board.bitboards[r], h8);
             SET_BIT(board.bitboards[r], f8);
         }
@@ -876,13 +875,9 @@ void make_move(uint32_t *move_reference) {
 
     if (GET_CODE(move) == queen_castle) {
         if (board.side == white) {
-            POP_BIT(board.bitboards[K], GET_FROM(move));
-            SET_BIT(board.bitboards[K], GET_TO(move));
             POP_BIT(board.bitboards[R], a1);
             SET_BIT(board.bitboards[R], d1);
         } else {
-            POP_BIT(board.bitboards[k], GET_FROM(move));
-            SET_BIT(board.bitboards[k], GET_TO(move));
             POP_BIT(board.bitboards[r], a8);
             SET_BIT(board.bitboards[r], d8);
         }
@@ -915,152 +910,38 @@ void make_move(uint32_t *move_reference) {
     }
 
 
-    // Update everything else
+    // Step 7.
     board.side ^= 1;
+    board.fullmove++;
+
+    if (GET_CODE(move) == capture || piece == p || piece == P)
+        board.halfmove = 0;
+    else
+        board.halfmove++;
+
     board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
     board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
     board.bitboards[14] = board.bitboards[12] | board.bitboards[13];
 }
 
-void unmake_move(uint32_t move) {
-    /*
-    1. Move the piece back to the old square
-    2. handle un-capt
-    3. Handle un-promo
-    4. Handle un-castle
-    5. undo castling rights
-    6. undo enpassant
-    */
-
-    board.side ^= 1;
-
-    // Step 1.
-    
-    // Find piece bitboard
-    int piece = -1;
-    for (int bb = p; bb <= K; bb++) {
-        if ((1ULL << GET_TO(move)) & board.bitboards[bb]) {
-            piece = bb;
-            break;
-        }
-    }
-
-    // Move the piece back
-    POP_BIT(board.bitboards[piece], GET_TO(move));
-    SET_BIT(board.bitboards[piece], GET_FROM(move));
-
-    // Step 2.
-    if (GET_CODE(move) == capture || GET_CODE(move) >= knight_promo_capture)
-        SET_BIT(board.bitboards[GET_MOD(move)], GET_TO(move));
-
-    // Step 3.
-
-    if (GET_CODE(move) == knight_promo || GET_CODE(move) == knight_promo_capture) {
-        if (board.side == white) {
-            POP_BIT(board.bitboards[N], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[P], GET_FROM(move));
-        } else {
-            POP_BIT(board.bitboards[n], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[p], GET_FROM(move));
-        }
-    }
-
-    if (GET_CODE(move) == bishop_promo || GET_CODE(move) == bishop_promo_capture) {
-        if (board.side == white) {
-            POP_BIT(board.bitboards[B], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[P], GET_FROM(move));
-        } else {
-            POP_BIT(board.bitboards[b], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[p], GET_FROM(move));
-        }
-    }
-
-    if (GET_CODE(move) == rook_promo || GET_CODE(move) == rook_promo_capture) {
-        if (board.side == white) {
-            POP_BIT(board.bitboards[R], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[P], GET_FROM(move));
-        } else {
-            POP_BIT(board.bitboards[r], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[p], GET_FROM(move));
-        }
-    }
-
-    if (GET_CODE(move) == queen_promo || GET_CODE(move) == queen_promo_capture) {
-        if (board.side == white) {
-            POP_BIT(board.bitboards[Q], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[P], GET_FROM(move));
-        } else {
-            POP_BIT(board.bitboards[q], GET_TO(move));
-            POP_BIT(board.bitboards[GET_MOD(move)], GET_FROM(move));
-            SET_BIT(board.bitboards[p], GET_FROM(move));
-        }
-    }
-
-    // Step 4.
-
-    if (GET_CODE(move) == king_castle) {
-        if (board.side == white) {
-            SET_BIT(board.bitboards[K], GET_FROM(move));
-            POP_BIT(board.bitboards[K], GET_TO(move));
-            SET_BIT(board.bitboards[R], h1);
-            POP_BIT(board.bitboards[R], f1);
-        } else {
-            SET_BIT(board.bitboards[k], GET_FROM(move));
-            POP_BIT(board.bitboards[k], GET_TO(move));
-            SET_BIT(board.bitboards[r], h8);
-            POP_BIT(board.bitboards[r], f8);
-        }
-    }
-
-    if (GET_CODE(move) == queen_castle) {
-        if (board.side == white) {
-            SET_BIT(board.bitboards[K], GET_FROM(move));
-            POP_BIT(board.bitboards[K], GET_TO(move));
-            SET_BIT(board.bitboards[R], a1);
-            POP_BIT(board.bitboards[R], d1);
-        } else {
-            SET_BIT(board.bitboards[k], GET_FROM(move));
-            POP_BIT(board.bitboards[k], GET_TO(move));
-            SET_BIT(board.bitboards[r], a8);
-            POP_BIT(board.bitboards[r], d8);
-        }
-    }
-
-    // Step 5.
-    if (GET_CODE(move) == king_castle || GET_CODE(move) == queen_castle)
-        board.castling = GET_MOD(move);
-
-    // Step 6.
-    if (GET_CODE(move) == ep_capture) {
-            board.enpassant = GET_MOD(move);
-            if (board.side == white)
-                SET_BIT(board.bitboards[p], board.enpassant - 8);
-            else
-                SET_BIT(board.bitboards[P], board.enpassant + 8);
-        }
-        
-    if (board.enpassant == 0);
-        board.enpassant = -1;
-
-    board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
-    board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
-    board.bitboards[14] = board.bitboards[12] | board.bitboards[13];    
-}
-
-void print_move(uint32_t move) {
-    printf("%s ", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
+void print_move(uint16_t move) {
+    printf("%s", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
          'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8)});
-    // printf("%d", (move >> 12));
+    if (GET_CODE(move) >= knight_promo) {
+        switch (GET_CODE(move)) {
+            case knight_promo_capture:
+            case knight_promo: printf("%s", "n"); break;
+            case bishop_promo_capture:
+            case bishop_promo: printf("%s", "b"); break;
+            case rook_promo_capture:
+            case rook_promo: printf("%s", "r"); break;
+            case queen_promo_capture:
+            case queen_promo: printf("%s", "q"); break;
+        }
+    }
 }
 
-void add_move(MOVE_LIST_T *move_list, int from, int to, int code, int mod) {
-    uint32_t move = (from | (to << 6) | (code << 12) | (mod << 16));
+void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
+    uint16_t move = (from | (to << 6) | (code << 12));
     move_list->moves[move_list->count++] = move;
 }

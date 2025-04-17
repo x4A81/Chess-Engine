@@ -35,6 +35,7 @@ typedef enum CASTLING_RIGHTS {
 
 typedef struct BOARD_T {
     uint64_t bitboards[15]; // pnbrqkPNBRQK black white all
+    uint64_t hash_key;
     int side;
     int castling;
     int enpassant;

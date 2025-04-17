@@ -13,11 +13,13 @@ void perft(int depth) {
 
     MOVE_LIST_T moves;
     generate_moves(&moves);
-
+    if (moves.count == 0){
+        return;
+    }
     for (int idx = 0; idx < moves.count; idx++) {
         int move = moves.moves[idx];
         SAVE_BOARD();
-        make_move(&move);
+        make_move(move);
         perft(depth - 1);
         RESTORE_BOARD();
     }
@@ -31,11 +33,14 @@ void perft_divide(int depth) {
 
     MOVE_LIST_T moves;
     generate_moves(&moves);
+    if (moves.count == 0){
+        return;
+    }
 
     for (int idx = 0; idx < moves.count; idx++) {
         int move = moves.moves[idx];
         SAVE_BOARD();
-        make_move(&move);
+        make_move(move);
         long copy_perft_nodes = perft_nodes;
         perft(depth - 1);
         print_move(move);
@@ -52,6 +57,6 @@ void perft_test(int start_depth, int max_depth, int test_f) {
         else
             perft_divide(depth);
 
-        printf("Depth %d\nNodes: %ld\n", depth, perft_nodes);
+        printf("\nDepth %d\nNodes: %ld\n", depth, perft_nodes);
     }
 }
