@@ -6,25 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/workspaces/Chess-Engine/include/board.h
-stdint.h
--
+/workspaces/Chess-Engine/include/uci.h
 string.h
 -
 
-/workspaces/Chess-Engine/include/move.h
-stdint.h
+/workspaces/Chess-Engine/include/utils.h
+
+/workspaces/Chess-Engine/src/uci.c
+../include/uci.h
+/workspaces/Chess-Engine/include/uci.h
+../include/utils.h
+/workspaces/Chess-Engine/include/utils.h
+stdio.h
 -
-board.h
-/workspaces/Chess-Engine/include/board.h
-
-/workspaces/Chess-Engine/main.c
-include/board.h
-/workspaces/Chess-Engine/include/board.h
-include/move.h
-/workspaces/Chess-Engine/include/move.h
-tests/test.h
-/workspaces/Chess-Engine/tests/test.h
-
-/workspaces/Chess-Engine/tests/test.h
 

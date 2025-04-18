@@ -1,1 +1,1 @@
-/usr/bin/gcc  -O3 -g   CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/src/board.c.o CMakeFiles/main.dir/src/move.c.o CMakeFiles/main.dir/src/rng.c.o CMakeFiles/main.dir/src/uci.c.o CMakeFiles/main.dir/src/zobrist.c.o CMakeFiles/main.dir/tests/test.c.o  -o main 
+/usr/bin/gcc  -O3 -g   CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/src/board.c.o CMakeFiles/main.dir/src/move.c.o CMakeFiles/main.dir/src/rng.c.o CMakeFiles/main.dir/src/uci.c.o CMakeFiles/main.dir/src/utils.c.o CMakeFiles/main.dir/src/zobrist.c.o CMakeFiles/main.dir/tests/test.c.o  -o main 

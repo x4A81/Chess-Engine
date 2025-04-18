@@ -1,11 +1,6 @@
 {
     "files.associations": {
-        "board.h": "c"
-    },
-    "github.copilot.enable": {
-        "*": false,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false
+        "utils.h": "c",
+        "stdlib.h": "c"
     }
 }

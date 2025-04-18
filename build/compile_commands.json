@@ -26,6 +26,11 @@
 },
 {
   "directory": "/workspaces/Chess-Engine/build",
+  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/utils.c.o   -c /workspaces/Chess-Engine/src/utils.c",
+  "file": "/workspaces/Chess-Engine/src/utils.c"
+},
+{
+  "directory": "/workspaces/Chess-Engine/build",
   "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/zobrist.c.o   -c /workspaces/Chess-Engine/src/zobrist.c",
   "file": "/workspaces/Chess-Engine/src/zobrist.c"
 },

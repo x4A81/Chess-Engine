@@ -3,7 +3,8 @@
 
 CMakeFiles/main.dir/main.c.o
  /workspaces/Chess-Engine/include/board.h
- /workspaces/Chess-Engine/include/move.h
+ /workspaces/Chess-Engine/include/uci.h
+ /workspaces/Chess-Engine/include/utils.h
  /workspaces/Chess-Engine/main.c
  /workspaces/Chess-Engine/tests/test.h
 CMakeFiles/main.dir/src/board.c.o
@@ -18,7 +19,14 @@ CMakeFiles/main.dir/src/rng.c.o
  /workspaces/Chess-Engine/include/rng.h
  /workspaces/Chess-Engine/src/rng.c
 CMakeFiles/main.dir/src/uci.c.o
+ /workspaces/Chess-Engine/include/uci.h
+ /workspaces/Chess-Engine/include/utils.h
  /workspaces/Chess-Engine/src/uci.c
+CMakeFiles/main.dir/src/utils.c.o
+ /workspaces/Chess-Engine/include/board.h
+ /workspaces/Chess-Engine/include/move.h
+ /workspaces/Chess-Engine/include/utils.h
+ /workspaces/Chess-Engine/src/utils.c
 CMakeFiles/main.dir/src/zobrist.c.o
  /workspaces/Chess-Engine/src/zobrist.c
 CMakeFiles/main.dir/tests/test.c.o

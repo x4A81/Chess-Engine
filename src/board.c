@@ -55,7 +55,7 @@ void print_bitboard(uint64_t bb) {
     printf("     a  b  c  d  e  f  g  h\n");
 }
 
-void setup_board(char *fen) {
+void parse_fen(const char *fen) {
     int char_to_piece[] = {
         ['p'] = 0, ['n'] = 1, ['b'] = 2, ['r'] = 3, ['q'] = 4, ['k'] = 5,
         ['P'] = 6, ['N'] = 7, ['B'] = 8, ['R'] = 9, ['Q'] = 10, ['K'] = 11};

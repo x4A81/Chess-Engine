@@ -613,24 +613,32 @@ void generate_moves(MOVE_LIST_T *move_list) {
                 if (pop_count(checkers) == 0) {
                     // Enpassant discovered check
                     POP_BIT(board.bitboards[14], board.enpassant - 8);
+                    SET_BIT(board.bitboards[14], board.enpassant);
                     if (get_psuedo_attackers(king_sq, !board.side))
                         attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                     SET_BIT(board.bitboards[14], board.enpassant - 8);
+                    POP_BIT(board.bitboards[14], board.enpassant);
                 } else {
                     // If enpassant captures or blocks a checker
-                    if (!((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                    if ((1ULL << (board.enpassant - 8)) & capture_mask || (1ULL << board.enpassant) & push_mask)
+                        attack_bb = (1ULL << board.enpassant);
+                    else
                         attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                 }
             } else {
                 if (pop_count(checkers) == 0) {
-                    POP_BIT(board.bitboards[14], board.enpassant + 8);
                     // Enpassant discovered check
+                    POP_BIT(board.bitboards[14], board.enpassant + 8);
+                    SET_BIT(board.bitboards[14], board.enpassant);
                     if (get_psuedo_attackers(king_sq, !board.side))
                         attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                     SET_BIT(board.bitboards[14], board.enpassant + 8);
+                    POP_BIT(board.bitboards[14], board.enpassant);
                 } else {
                     // If enpassant captures or blocks a checker
-                    if (!((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask))
+                    if ((1ULL << (board.enpassant + 8)) & capture_mask || (1ULL << board.enpassant) & push_mask)
+                        attack_bb = (1ULL << board.enpassant);
+                    else
                         attack_bb = pawn_attack_table[from_sq][board.side] & capture_mask & board.bitboards[13-board.side];
                 }
             }
