@@ -60,7 +60,7 @@ extern BOARD_T board;
 
 void print_board();
 void print_bitboard(uint64_t bitboard);
-void setup_board(char *fen);
+void parse_fen(const char *fen);
 
 static inline int pop_count(uint64_t bb) {
     int count = 0;
