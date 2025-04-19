@@ -3,6 +3,7 @@
 #include "../include/board.h"
 #include <stdio.h>
 
+// Define perft_nodes
 long perft_nodes = 0L;
 
 void perft(int depth) {
@@ -13,9 +14,12 @@ void perft(int depth) {
 
     MOVE_LIST_T moves;
     generate_moves(&moves);
+
+    // The position is stalemate or checkmate.
     if (moves.count == 0){
         return;
     }
+
     for (int idx = 0; idx < moves.count; idx++) {
         int move = moves.moves[idx];
         SAVE_BOARD();
@@ -33,6 +37,8 @@ void perft_divide(int depth) {
 
     MOVE_LIST_T moves;
     generate_moves(&moves);
+
+    // The position is stalemate or checkmate.
     if (moves.count == 0){
         return;
     }
@@ -57,6 +63,7 @@ void perft_test(int start_depth, int max_depth, int test_f) {
         else
             perft_divide(depth);
 
+        // Print debug info.
         printf("\nDepth %d\nNodes: %ld\n", depth, perft_nodes);
     }
 }

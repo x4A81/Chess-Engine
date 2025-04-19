@@ -5,6 +5,9 @@
 #include <stdio.h>
 
 void parse_uci(const char* uci_string) {
+
+    // Handles uci commands.
+
     if (strcmp(uci_string, "uci") == 0) {
         printf("id name CHESS_ENGINE\n");
         printf("id author x4A81\n");
@@ -21,6 +24,7 @@ void parse_uci(const char* uci_string) {
     }
 
     else if (strcmp(uci_string, "ucinewgame") == 0) {
+        
         // Clear things like transposition tables, killer move tables, board history, etc.
         reset_engine();
         setup_engine();
@@ -29,7 +33,8 @@ void parse_uci(const char* uci_string) {
     else if (strncmp(uci_string, "position", 8) == 0) {
         int offset = 9;
         char *extra_moves = NULL;
-        // input the fen string
+        
+        // Input the fen string.
         if (strncmp(uci_string+offset, "startpos", 8) == 0) {
             setup_board("startpos");
             offset = 18;
@@ -42,10 +47,10 @@ void parse_uci(const char* uci_string) {
             extra_moves = strstr(uci_string+offset, "moves");
         }
 
-        // make any additional moves
+        // Make any additional moves.
         if (strncmp(uci_string+offset, "moves", 5) == 0) {
             extra_moves += strlen("moves ");
-            // parse the moves
+            // Parse the moves.
             char *move_string = strtok(extra_moves, " ");
             while (move_string) {
                 make_move(parse_move(move_string));

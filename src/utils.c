@@ -11,7 +11,7 @@ void graceful_exit(const char* message, int exit_code) {
     if (message)
         fprintf(stderr, "%s\n", message);
 
-    // Cleanup
+    // Cleanup.
 
 
     exit(exit_code);
@@ -31,9 +31,9 @@ void reset_engine() {
 }
 
 void setup_board(const char *fen) {
-    if (fen == "startpos")
+    if (strcmp(fen, "startpos") == 0)
         fen = START_POS;
-    parse_fen(fen);
+    load_fen(fen);
     board.hash_key = hash_board();
 }
 
@@ -46,7 +46,7 @@ int parse_move(char* move_string) {
     rank = (move_string[3] - '0') - 1;
     to_sq = 8*rank + file;
     
-    // Determine the move code
+    // Determine the move code.
     code = 0;
     if (board.bitboards[14] & (1ULL << to_sq)) {
         code = 4;
@@ -75,5 +75,7 @@ int parse_move(char* move_string) {
             code = 3;
     }
 
+
+    // Return encoded move.
     return from_sq | (to_sq << 6) | (code << 12);
 }

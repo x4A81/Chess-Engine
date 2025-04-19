@@ -17,12 +17,20 @@ typedef enum MOVE_TYPES {
     knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
 } MOVE_TYPES;
 
+
+// Move tables for pieces
+
+// [sq][side]
 uint64_t pawn_move_table[64][2] = { { 0x0, 0x100 }, { 0x0, 0x200 }, { 0x0, 0x400 }, { 0x0, 0x800 }, { 0x0, 0x1000 }, { 0x0, 0x2000 }, { 0x0, 0x4000 }, { 0x0, 0x8000 }, { 0x1, 0x1010000 }, { 0x2, 0x2020000 }, { 0x4, 0x4040000 }, { 0x8, 0x8080000 }, { 0x10, 0x10100000 }, { 0x20, 0x20200000 }, { 0x40, 0x40400000 }, { 0x80, 0x80800000 }, { 0x100, 0x1000000 }, { 0x200, 0x2000000 }, { 0x400, 0x4000000 }, { 0x800, 0x8000000 }, { 0x1000, 0x10000000 }, { 0x2000, 0x20000000 }, { 0x4000, 0x40000000 }, { 0x8000, 0x80000000 }, { 0x10000, 0x100000000 }, { 0x20000, 0x200000000 }, { 0x40000, 0x400000000 }, { 0x80000, 0x800000000 }, { 0x100000, 0x1000000000 }, { 0x200000, 0x2000000000 }, { 0x400000, 0x4000000000 }, { 0x800000, 0x8000000000 }, { 0x1000000, 0x10000000000 }, { 0x2000000, 0x20000000000 }, { 0x4000000, 0x40000000000 }, { 0x8000000, 0x80000000000 }, { 0x10000000, 0x100000000000 }, { 0x20000000, 0x200000000000 }, { 0x40000000, 0x400000000000 }, { 0x80000000, 0x800000000000 }, { 0x100000000, 0x1000000000000 }, { 0x200000000, 0x2000000000000 }, { 0x400000000, 0x4000000000000 }, { 0x800000000, 0x8000000000000 }, { 0x1000000000, 0x10000000000000 }, { 0x2000000000, 0x20000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x8000000000, 0x80000000000000 }, { 0x10100000000, 0x100000000000000 }, { 0x20200000000, 0x200000000000000 }, { 0x40400000000, 0x400000000000000 }, { 0x80800000000, 0x800000000000000 }, { 0x101000000000, 0x1000000000000000 }, { 0x202000000000, 0x2000000000000000 }, { 0x404000000000, 0x4000000000000000 }, { 0x808000000000, 0x8000000000000000 }, { 0x1000000000000, 0x0 }, { 0x2000000000000, 0x0 }, { 0x4000000000000, 0x0 }, { 0x8000000000000, 0x0 }, { 0x10000000000000, 0x0 }, { 0x20000000000000, 0x0 }, { 0x40000000000000, 0x0 }, { 0x80000000000000, 0x0 } };
 uint64_t pawn_attack_table[64][2] = { { 0x0, 0x200 }, { 0x0, 0x500 }, { 0x0, 0xa00 }, { 0x0, 0x1400 }, { 0x0, 0x2800 }, { 0x0, 0x5000 }, { 0x0, 0xa000 }, { 0x0, 0x4000 }, { 0x2, 0x20000 }, { 0x5, 0x50000 }, { 0xa, 0xa0000 }, { 0x14, 0x140000 }, { 0x28, 0x280000 }, { 0x50, 0x500000 }, { 0xa0, 0xa00000 }, { 0x40, 0x400000 }, { 0x200, 0x2000000 }, { 0x500, 0x5000000 }, { 0xa00, 0xa000000 }, { 0x1400, 0x14000000 }, { 0x2800, 0x28000000 }, { 0x5000, 0x50000000 }, { 0xa000, 0xa0000000 }, { 0x4000, 0x40000000 }, { 0x20000, 0x200000000 }, { 0x50000, 0x500000000 }, { 0xa0000, 0xa00000000 }, { 0x140000, 0x1400000000 }, { 0x280000, 0x2800000000 }, { 0x500000, 0x5000000000 }, { 0xa00000, 0xa000000000 }, { 0x400000, 0x4000000000 }, { 0x2000000, 0x20000000000 }, { 0x5000000, 0x50000000000 }, { 0xa000000, 0xa0000000000 }, { 0x14000000, 0x140000000000 }, { 0x28000000, 0x280000000000 }, { 0x50000000, 0x500000000000 }, { 0xa0000000, 0xa00000000000 }, { 0x40000000, 0x400000000000 }, { 0x200000000, 0x2000000000000 }, { 0x500000000, 0x5000000000000 }, { 0xa00000000, 0xa000000000000 }, { 0x1400000000, 0x14000000000000 }, { 0x2800000000, 0x28000000000000 }, { 0x5000000000, 0x50000000000000 }, { 0xa000000000, 0xa0000000000000 }, { 0x4000000000, 0x40000000000000 }, { 0x20000000000, 0x200000000000000 }, { 0x50000000000, 0x500000000000000 }, { 0xa0000000000, 0xa00000000000000 }, { 0x140000000000, 0x1400000000000000 }, { 0x280000000000, 0x2800000000000000 }, { 0x500000000000, 0x5000000000000000 }, { 0xa00000000000, 0xa000000000000000 }, { 0x400000000000, 0x4000000000000000 }, { 0x2000000000000, 0x0 }, { 0x5000000000000, 0x0 }, { 0xa000000000000, 0x0 }, { 0x14000000000000, 0x0 }, { 0x28000000000000, 0x0 }, { 0x50000000000000, 0x0 }, { 0xa0000000000000, 0x0 }, { 0x40000000000000, 0x0 } };
+
+// [sq]
 uint64_t knight_move_table[64] = { 0x20400, 0x50800, 0xa1100, 0x142200, 0x284400, 0x508800, 0xa01000, 0x402000, 0x2040004, 0x5080008, 0xa110011, 0x14220022, 0x28440044, 0x50880088, 0xa0100010, 0x40200020, 0x204000402, 0x508000805, 0xa1100110a, 0x1422002214, 0x2844004428, 0x5088008850, 0xa0100010a0, 0x4020002040, 0x20400040200, 0x50800080500, 0xa1100110a00, 0x142200221400, 0x284400442800, 0x508800885000, 0xa0100010a000, 0x402000204000, 0x2040004020000, 0x5080008050000, 0xa1100110a0000, 0x14220022140000, 0x28440044280000, 0x50880088500000, 0xa0100010a00000, 0x40200020400000, 0x204000402000000, 0x508000805000000, 0xa1100110a000000, 0x1422002214000000, 0x2844004428000000, 0x5088008850000000, 0xa0100010a0000000, 0x4020002040000000, 0x400040200000000, 0x800080500000000, 0x1100110a00000000, 0x2200221400000000, 0x4400442800000000, 0x8800885000000000, 0x100010a000000000, 0x2000204000000000, 0x4020000000000, 0x8050000000000, 0x110a0000000000, 0x22140000000000, 0x44280000000000, 0x88500000000000, 0x10a00000000000, 0x20400000000000 };
 uint64_t king_move_table[64] = { 0x302, 0x705, 0xe0a, 0x1c14, 0x3828, 0x7050, 0xe0a0, 0xc040, 0x30203, 0x70507, 0xe0a0e, 0x1c141c, 0x382838, 0x705070, 0xe0a0e0, 0xc040c0, 0x3020300, 0x7050700, 0xe0a0e00, 0x1c141c00, 0x38283800, 0x70507000, 0xe0a0e000, 0xc040c000, 0x302030000, 0x705070000, 0xe0a0e0000, 0x1c141c0000, 0x3828380000, 0x7050700000, 0xe0a0e00000, 0xc040c00000, 0x30203000000, 0x70507000000, 0xe0a0e000000, 0x1c141c000000, 0x382838000000, 0x705070000000, 0xe0a0e0000000, 0xc040c0000000, 0x3020300000000, 0x7050700000000, 0xe0a0e00000000, 0x1c141c00000000, 0x38283800000000, 0x70507000000000, 0xe0a0e000000000, 0xc040c000000000, 0x302030000000000, 0x705070000000000, 0xe0a0e0000000000, 0x1c141c0000000000, 0x3828380000000000, 0x7050700000000000, 0xe0a0e00000000000, 0xc040c00000000000, 0x203000000000000, 0x507000000000000, 0xa0e000000000000, 0x141c000000000000, 0x2838000000000000, 0x5070000000000000, 0xa0e0000000000000, 0x40c0000000000000 };
 
 void generate_pawn_move_table() {
+    // Sets and prints the pawn move and attack tables.
+
     uint64_t bb;
     printf("{ ");
     for (int sq = 0; sq < 64; sq++) {
@@ -60,6 +68,7 @@ void generate_pawn_move_table() {
     
     printf("};\n{ ");
     
+    // Print attack table.
     for (int sq = 0; sq < 64; sq++) {
         printf("{ 0x%" PRIx64 ", 0x%" PRIx64 " }, ", pawn_attack_table[sq][0], pawn_attack_table[sq][1]);
     }
@@ -68,6 +77,9 @@ void generate_pawn_move_table() {
 }
 
 void generate_knight_move_table() {
+
+    // Prints and sets the knight move table.
+
     uint64_t l1, l2, r1, r2, h1, h2, bb;
     printf("{ ");
     for (int sq = 0; sq < 64; sq++) {
@@ -86,6 +98,9 @@ void generate_knight_move_table() {
 }
 
 void generate_king_move_table() {
+
+    // Prints and sets the king move table.
+
     uint64_t bb;
     printf("{ ");
     for (int sq = 0; sq < 64; sq++) {
@@ -98,6 +113,8 @@ void generate_king_move_table() {
 
     printf("};");
 }
+
+/*<========Magic Bitboards=========>*/
 
 uint64_t rook_movement_masks[64];
 uint64_t bishop_movement_masks[64];
@@ -269,6 +286,9 @@ void generate_magics() {
 }
 
 void initialise_sliding_move_tables(int bishop_f) {
+
+    // Initialises rook and bishop move tables.
+
     for (int sq = 0; sq < 64; sq++) {
         bishop_movement_masks[sq] = mask_bishop_movement(sq);
         rook_movement_masks[sq] = mask_rook_movement(sq);
@@ -290,6 +310,9 @@ void initialise_sliding_move_tables(int bishop_f) {
 }
 
 uint64_t rook_moves(int sq, uint64_t bb) {
+
+    // Gets rook moves for a given square and blocker bitboard.
+    
     bb &= rook_movement_masks[sq];
     bb *= rook_magics[sq];
     bb >>= 64 - rook_shifts[sq];
@@ -297,6 +320,9 @@ uint64_t rook_moves(int sq, uint64_t bb) {
 }
 
 uint64_t bishop_moves(int sq, uint64_t bb) {
+
+    // Gets bishop moves for a given square and blocker bitboard.
+
     bb &= bishop_movement_masks[sq];
     bb *= bishop_magics[sq];
     bb >>= 64 - bishop_shifts[sq];
@@ -304,10 +330,16 @@ uint64_t bishop_moves(int sq, uint64_t bb) {
 }
 
 uint64_t queen_moves(int sq, uint64_t bb) {
+
+    // Gets queen moves for a given square and blocker bitboard.
+
     return rook_moves(sq, bb) | bishop_moves(sq, bb);
 }
 
 uint64_t get_psuedo_attackers(int sq, int side) {
+
+    // Return the psuedo legal attackers of a square belonging to side.
+
     uint64_t bb, attack_bb;
 
     // Attacks by pawns
@@ -935,6 +967,9 @@ void make_move(uint16_t move) {
 }
 
 void print_move(uint16_t move) {
+
+    // Prints the move in algebraic notation.
+    
     printf("%s", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
          'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8)});
     if (GET_CODE(move) >= knight_promo) {
@@ -952,6 +987,9 @@ void print_move(uint16_t move) {
 }
 
 void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
+
+    // Encodes and adds a move to a movelist.
+
     uint16_t move = (from | (to << 6) | (code << 12));
     move_list->moves[move_list->count++] = move;
 }

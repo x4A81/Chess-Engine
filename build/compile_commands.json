@@ -1,42 +1,44 @@
 [
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/main.c.o   -c /workspaces/Chess-Engine/main.c",
-  "file": "/workspaces/Chess-Engine/main.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/main.c.o -c /home/jk/Documents/Chess-Engine/main.c",
+  "file": "/home/jk/Documents/Chess-Engine/main.c",
+  "output": "CMakeFiles/main.dir/main.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/board.c.o   -c /workspaces/Chess-Engine/src/board.c",
-  "file": "/workspaces/Chess-Engine/src/board.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/board.c.o -c /home/jk/Documents/Chess-Engine/src/board.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/board.c",
+  "output": "CMakeFiles/main.dir/src/board.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/move.c.o   -c /workspaces/Chess-Engine/src/move.c",
-  "file": "/workspaces/Chess-Engine/src/move.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/move.c.o -c /home/jk/Documents/Chess-Engine/src/move.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/move.c",
+  "output": "CMakeFiles/main.dir/src/move.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/rng.c.o   -c /workspaces/Chess-Engine/src/rng.c",
-  "file": "/workspaces/Chess-Engine/src/rng.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/rng.c.o -c /home/jk/Documents/Chess-Engine/src/rng.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/rng.c",
+  "output": "CMakeFiles/main.dir/src/rng.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/uci.c.o   -c /workspaces/Chess-Engine/src/uci.c",
-  "file": "/workspaces/Chess-Engine/src/uci.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/uci.c.o -c /home/jk/Documents/Chess-Engine/src/uci.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/uci.c",
+  "output": "CMakeFiles/main.dir/src/uci.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/utils.c.o   -c /workspaces/Chess-Engine/src/utils.c",
-  "file": "/workspaces/Chess-Engine/src/utils.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/utils.c.o -c /home/jk/Documents/Chess-Engine/src/utils.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/utils.c",
+  "output": "CMakeFiles/main.dir/src/utils.c.o"
 },
 {
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/src/zobrist.c.o   -c /workspaces/Chess-Engine/src/zobrist.c",
-  "file": "/workspaces/Chess-Engine/src/zobrist.c"
-},
-{
-  "directory": "/workspaces/Chess-Engine/build",
-  "command": "/usr/bin/gcc    -O3 -g   -o CMakeFiles/main.dir/tests/test.c.o   -c /workspaces/Chess-Engine/tests/test.c",
-  "file": "/workspaces/Chess-Engine/tests/test.c"
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/tests/test.c.o -c /home/jk/Documents/Chess-Engine/tests/test.c",
+  "file": "/home/jk/Documents/Chess-Engine/tests/test.c",
+  "output": "CMakeFiles/main.dir/tests/test.c.o"
 }
 ]

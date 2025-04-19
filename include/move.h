@@ -38,10 +38,21 @@ typedef struct MOVE_LIST_T {
     int count;
 } MOVE_LIST_T;
 
+// Initialises the move tables for rooks and bishops.
 void initialise_sliding_move_tables(int bishop_f);
+
+// Adds a move to a move list.
 void add_move(MOVE_LIST_T *move_list, int from, int to, int code);
+
+// Returns the psuedo legal attackers of a square belonging to side.
 uint64_t get_psuedo_attackers(int sq, int side);
+
+// Generates moves to a move list.
 void generate_moves(MOVE_LIST_T *move_list);
+
+// Makes a move on the global board.
 void make_move(uint16_t move);
+
+// Prints a move in algebraic notation.
 void print_move(uint16_t move);
 #endif
