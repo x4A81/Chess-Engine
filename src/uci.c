@@ -1,5 +1,7 @@
 #include "../include/uci.h"
 #include "../include/utils.h"
+#include "../include/move.h"
+#include "../include/board.h"
 #include <stdio.h>
 
 void parse_uci(const char* uci_string) {
@@ -30,7 +32,7 @@ void parse_uci(const char* uci_string) {
         if (strncmp(uci_string+offset, "startpos", 8) == 0) {
             setup_board("startpos");
             offset = 18;
-            extra_moves = uci_string+offset;
+            extra_moves = (char*)uci_string+offset;
         }
 
         else if (strncmp(uci_string+offset, "fen", 3) == 0) {
@@ -40,12 +42,19 @@ void parse_uci(const char* uci_string) {
         }
 
         // make any additional moves
-        // if (strncmp(uci_string+offset, "moves", 5) == 0) {
-        //     offset += 6;
-        //     printf("%s\n", uci_string+offset);
-        // }
-        printf("%s\n", extra_moves);
+        if (strncmp(uci_string+offset, "moves", 5) == 0) {
+            extra_moves += strlen("moves ");
+            // parse the moves
+            char *move_string = strtok(extra_moves, " ");
+            while (move_string) {
+                make_move(parse_move(move_string));
+                move_string = strtok(NULL, " ");
+            }
+        }
     }
+
+    else if (strncmp(uci_string, "d", 1) == 0)
+        print_board();
     
     else
         printf("Unknown command: %s\n", uci_string);
