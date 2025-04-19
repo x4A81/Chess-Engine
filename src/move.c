@@ -930,6 +930,8 @@ void make_move(uint16_t move) {
     board.bitboards[12] = board.bitboards[p] | board.bitboards[n] | board.bitboards[b] | board.bitboards[r] | board.bitboards[q] | board.bitboards[k];
     board.bitboards[13] = board.bitboards[P] | board.bitboards[N] | board.bitboards[B] | board.bitboards[R] | board.bitboards[Q] | board.bitboards[K];
     board.bitboards[14] = board.bitboards[12] | board.bitboards[13];
+
+    board.hash_key = hash_board();
 }
 
 void print_move(uint16_t move) {

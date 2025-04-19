@@ -26,6 +26,7 @@ void print_board() {
     printf("Enpassant square: %s\n", (board.enpassant == -1) ? "-" : (char[]){'a' + (board.enpassant % 8), '1' + (board.enpassant / 8)});
     printf("Halfmove Clock: %d\n", board.halfmove);
     printf("Full moves: %d\n", board.fullmove);
+    printf("Key: %d\n", board.hash_key);
 }
 
 void print_bitboard(uint64_t bb) {

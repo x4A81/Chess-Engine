@@ -23,6 +23,7 @@ void parse_uci(const char* uci_string) {
     else if (strcmp(uci_string, "ucinewgame") == 0) {
         // Clear things like transposition tables, killer move tables, board history, etc.
         reset_engine();
+        setup_engine();
     }
 
     else if (strncmp(uci_string, "position", 8) == 0) {

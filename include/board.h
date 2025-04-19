@@ -46,6 +46,7 @@ typedef struct BOARD_T {
 #define CLEAR_ALL_BITBOARDS() (memset(board.bitboards, 0ULL, 120))
 #define RESET_BOARD() do { \
     CLEAR_ALL_BITBOARDS(); \
+    board.hash_key = 0ULL; \
     board.side = -1; \
     board.castling = 0; \
     board.enpassant = -1; \

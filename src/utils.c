@@ -1,6 +1,7 @@
 #include "../include/utils.h"
 #include "../include/move.h"
 #include "../include/board.h"
+#include "../include/rng.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -21,6 +22,7 @@ void setup_engine() {
         return;
     initialise_sliding_move_tables(0);
     initialise_sliding_move_tables(1);
+    initialise_hash_keys();
     engine_initialised = 1;
 }
 
@@ -32,6 +34,7 @@ void setup_board(const char *fen) {
     if (fen == "startpos")
         fen = START_POS;
     parse_fen(fen);
+    board.hash_key = hash_board();
 }
 
 int parse_move(char* move_string) {
