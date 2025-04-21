@@ -47,6 +47,9 @@ void add_move(MOVE_LIST_T *move_list, int from, int to, int code);
 // Returns the psuedo legal attackers of a square belonging to side.
 uint64_t get_psuedo_attackers(int sq, int side);
 
+// Returns 1 if the side is in check.
+int is_check(int side);
+
 // Generates moves to a move list.
 void generate_moves(MOVE_LIST_T *move_list);
 

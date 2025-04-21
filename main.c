@@ -11,8 +11,10 @@ int main() {
     while (fgets(uci_string, sizeof(uci_string), stdin)) {
         uci_string[strcspn(uci_string, "\n")] = 0;
         parse_uci(uci_string);
+        fflush(stdout);
+        fflush(stdin);
     }
-
+    
     graceful_exit(NULL, 0);
     return 0;
 }

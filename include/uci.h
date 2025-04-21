@@ -3,6 +3,13 @@
 
 #include <string.h>
 
+extern volatile int DEBUG;
+extern volatile int STOP_SEARCH;
+
+extern float W_TIME, B_TIME, W_INC, B_INC;
+
+int time_exceeded();
+
 // Parses and acts on UCI commands.
 void parse_uci(const char* uci_string);
 

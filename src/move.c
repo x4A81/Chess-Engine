@@ -365,6 +365,15 @@ uint64_t get_psuedo_attackers(int sq, int side) {
     return attack_bb; // If the attack board is empty then the square is not attacked
 }
 
+int is_check(int side) {
+    
+    // Check if the king is in check.
+
+    int king_sq = (side == white) ? ls1b(board.bitboards[K]) : ls1b(board.bitboards[k]);
+    uint64_t attack_bb = get_psuedo_attackers(king_sq, !side);
+    return (attack_bb != 0);
+}
+
 void generate_moves(MOVE_LIST_T *move_list) {
     move_list->count = 0;
 
@@ -971,7 +980,7 @@ void print_move(uint16_t move) {
     // Prints the move in algebraic notation.
     
     printf("%s", (char[]){'a' + (GET_FROM(move) % 8), '1' + (GET_FROM(move) / 8),
-         'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8)});
+         'a' + (GET_TO(move) % 8), '1' + (GET_TO(move) / 8), '\0'});
     if (GET_CODE(move) >= knight_promo) {
         switch (GET_CODE(move)) {
             case knight_promo_capture:

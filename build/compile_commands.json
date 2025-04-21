@@ -13,6 +13,12 @@
 },
 {
   "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/eval.c.o -c /home/jk/Documents/Chess-Engine/src/eval.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/eval.c",
+  "output": "CMakeFiles/main.dir/src/eval.c.o"
+},
+{
+  "directory": "/home/jk/Documents/Chess-Engine/build",
   "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/move.c.o -c /home/jk/Documents/Chess-Engine/src/move.c",
   "file": "/home/jk/Documents/Chess-Engine/src/move.c",
   "output": "CMakeFiles/main.dir/src/move.c.o"
@@ -22,6 +28,12 @@
   "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/rng.c.o -c /home/jk/Documents/Chess-Engine/src/rng.c",
   "file": "/home/jk/Documents/Chess-Engine/src/rng.c",
   "output": "CMakeFiles/main.dir/src/rng.c.o"
+},
+{
+  "directory": "/home/jk/Documents/Chess-Engine/build",
+  "command": "/usr/bin/gcc  -O3 -g -o CMakeFiles/main.dir/src/search/search.c.o -c /home/jk/Documents/Chess-Engine/src/search/search.c",
+  "file": "/home/jk/Documents/Chess-Engine/src/search/search.c",
+  "output": "CMakeFiles/main.dir/src/search/search.c.o"
 },
 {
   "directory": "/home/jk/Documents/Chess-Engine/build",
