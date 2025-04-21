@@ -15,8 +15,9 @@ int quiescence(int alpha, int beta) {
 
 int negamax(int depth, int alpha, int beta) {
 
+    // If the search was stopped or time ran out.
     if (STOP_SEARCH || time_exceeded())
-        return eval();
+        return alpha; // Return the best score so far.
 
     if (depth == 0)
         return quiescence(alpha, beta);
@@ -24,15 +25,17 @@ int negamax(int depth, int alpha, int beta) {
     MOVE_LIST_T move_list;
     generate_moves(&move_list);
 
+    // Checkmate and stalemate detection.
     if (move_list.count == 0) {
-        // Position is checkmate or stalemate
+        // Position is checkmate or stalemate.
 
         if (is_check(board.side))
-            return -INF; // Checkmate
+            return -INF; // Checkmate.
         else
-            return 0; // Stalemate
+            return 0; // Stalemate.
     }
 
+    // Set up PV.
     int pv_index = (ply*(2*MAX_PLY+1-ply))/2;
     int next_pv_index = pv_index + MAX_PLY - ply;
     pv_length[ply] = 0;
@@ -45,17 +48,23 @@ int negamax(int depth, int alpha, int beta) {
         make_move(move);
         ply++;
         nodes++;
+
+        // Run alpha beta search.
         int score = -negamax(depth - 1, -beta, -alpha);
+        
         ply--;
         RESTORE_BOARD();
 
+        // Fail hard beta cutoff.
         if (score >= beta) {
-            // Fail hard beta cutoff.
             return beta;
         }
 
+        // Pv node.
         if (score > alpha) {
             alpha = score;
+
+            // Update PV table.
             pv_table[pv_index] = move;
 
             // Propagate up pv table
@@ -75,7 +84,7 @@ void search(int depth) {
 
     /*
     1. Use iterative deepening.
-    2. Use aspiration windows.
+    2. Call negamax search.
     */
 
     int alpha = -INF;
@@ -86,18 +95,8 @@ void search(int depth) {
     for (int d = 1; d <= depth || INFINITE; d++) {
         nodes = 0;
 
-        // Step 2. Aspiration Windows.
-        int window_min = alpha + 25; // 1/4 of a centipawn
-        int window_max = beta - 25; 
+        int score = negamax(d, alpha, beta);
 
-        int score = negamax(d, window_min, window_max);
-
-        // Research.
-        if (score < window_min)
-            score = negamax(d, alpha, window_max);
-        if (score > window_max)
-            score = negamax(d, window_min, beta);
-        
         // Print debug info.
         if (DEBUG) {
             printf("info depth %d nodes %d score cp %d pv ", d, nodes, score);
