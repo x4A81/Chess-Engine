@@ -83,10 +83,10 @@ void search(int depth) {
     ply = 0;
    
     // Step 1. Iterative deepening.
-    for (int d = 1; d <= depth; d++) {
+    for (int d = 1; d <= depth || INFINITE; d++) {
         nodes = 0;
 
-        // Step 2. Aspiration Windows
+        // Step 2. Aspiration Windows.
         int window_min = alpha + 25; // 1/4 of a centipawn
         int window_max = beta - 25; 
 

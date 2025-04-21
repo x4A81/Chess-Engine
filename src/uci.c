@@ -3,6 +3,7 @@
 #include "../include/move.h"
 #include "../include/board.h"
 #include "../include/search.h"
+#include "../tests/test.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -10,8 +11,8 @@
 
 volatile int DEBUG = 0;
 volatile int STOP_SEARCH = 0;
+volatile int INFINITE = 0;
 int MOVETIME = 0;
-int INFINITE = 0;
 
 float W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
 clock_t start_time;
@@ -64,7 +65,14 @@ void uci_go(const char* go_string) {
         } else if (strcmp(tok, "binc") == 0) {
             tok = strtok(NULL, " ");
             if (tok) B_INC = atof(tok);
-        }
+        
+        } else if (strcmp(tok, "perft") == 0) {
+            tok = strtok(NULL, " ");
+            if (tok) {
+                perft_test(atoi(tok), atoi(tok), 0);
+                return;
+            }
+        } 
 
         tok = strtok(NULL, " ");
     }
