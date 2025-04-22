@@ -3,6 +3,7 @@
 #include "../../include/board.h"
 #include "../../include/eval.h"
 #include "../../include/uci.h"
+#include "../../include/transposition.h"
 #include <stdio.h>
 
 long ply = 0, nodes = 0;
@@ -15,12 +16,25 @@ int quiescence(int alpha, int beta) {
 
 int negamax(int depth, int alpha, int beta) {
 
+    int score = 0, node_type = LOWERBOUND;
+
     // If the search was stopped or time ran out.
     if (STOP_SEARCH || time_exceeded())
         return alpha; // Return the best score so far.
 
     if (depth == 0)
         return quiescence(alpha, beta);
+
+    // Transposition table cutoffs.
+    TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
+    if (entry) {
+        if (entry->type == EXACT)
+            score = entry->score;
+        else if (entry->type == LOWERBOUND && entry->score >= beta)
+            return entry->score;
+        else if (entry->type == UPPERBOUND && entry->score < alpha)
+            return entry->score;
+    }
 
     MOVE_LIST_T move_list;
     generate_moves(&move_list);
@@ -50,19 +64,21 @@ int negamax(int depth, int alpha, int beta) {
         nodes++;
 
         // Run alpha beta search.
-        int score = -negamax(depth - 1, -beta, -alpha);
+        score = -negamax(depth - 1, -beta, -alpha);
         
         ply--;
         RESTORE_BOARD();
 
         // Fail hard beta cutoff.
         if (score >= beta) {
+            store_transposition(board.hash_key, depth, beta, LOWERBOUND, move);
             return beta;
         }
 
         // Pv node.
         if (score > alpha) {
             alpha = score;
+            node_type = EXACT;
 
             // Update PV table.
             pv_table[pv_index] = move;
@@ -76,6 +92,8 @@ int negamax(int depth, int alpha, int beta) {
 
         }
     }
+
+    store_transposition(board.hash_key, depth, alpha, node_type, pv_table[pv_index]);
 
     return alpha;
 }

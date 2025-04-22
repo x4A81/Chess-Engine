@@ -3,12 +3,13 @@
 
 #include <stdlib.h>
 
+#define ERR_TRANSPOSITION_INITIALISE 1
 
 // Cleanup the program and exit the program gracefully.
 void graceful_exit(const char* message, int exit_code);
 
 // Sets up the engine and initialises things such as transposition tables.
-void setup_engine();
+void setup_engine(__ssize_t transposition_size);
 
 // Resets engine variables such as transposition tables.
 void reset_engine();
@@ -18,7 +19,5 @@ void setup_board(const char *fen);
 
 // Parses a move string and return the encoded move.
 int parse_move(char* move_string);
-
-void build_string(char *buf, size_t buf_size, size_t *len, const char *fmt, ...);
 
 #endif

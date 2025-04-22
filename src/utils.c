@@ -2,6 +2,7 @@
 #include "../include/move.h"
 #include "../include/board.h"
 #include "../include/rng.h"
+#include "../include/transposition.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,22 +13,24 @@ void graceful_exit(const char* message, int exit_code) {
         fprintf(stderr, "%s\n", message);
 
     // Cleanup.
-
+    cleanup_transposition();
 
     exit(exit_code);
 }
 
-void setup_engine() {
+void setup_engine(__ssize_t transposition_size) {
     if (engine_initialised)
         return;
     initialise_sliding_move_tables(0);
     initialise_sliding_move_tables(1);
     initialise_hash_keys();
+    initialise_transposition(transposition_size);
     engine_initialised = 1;
 }
 
 void reset_engine() {
     RESET_BOARD();
+    clear_transposition();
 }
 
 void setup_board(const char *fen) {
