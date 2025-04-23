@@ -3,6 +3,7 @@
 #include "../include/board.h"
 #include "../include/rng.h"
 #include "../include/transposition.h"
+#include "../include/search.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,12 +26,14 @@ void setup_engine(__ssize_t transposition_size) {
     initialise_sliding_move_tables(1);
     initialise_hash_keys();
     initialise_transposition(transposition_size);
+    reset_search();
     engine_initialised = 1;
 }
 
 void reset_engine() {
     RESET_BOARD();
     clear_transposition();
+    reset_search();
 }
 
 void setup_board(const char *fen) {

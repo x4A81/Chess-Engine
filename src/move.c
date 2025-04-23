@@ -7,17 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define GET_FROM(move) (move & 0b111111)
-#define GET_TO(move) ((move >> 6) & 0b111111)
-#define GET_CODE(move) ((move >> 12) & 0b1111)
-
-typedef enum MOVE_TYPES {
-    quiet, dbl_pawn, king_castle, queen_castle, capture, ep_capture,
-    knight_promo = 8, bishop_promo, rook_promo, queen_promo,
-    knight_promo_capture, bishop_promo_capture, rook_promo_capture, queen_promo_capture
-} MOVE_TYPES;
-
-
 // Move tables for pieces
 
 // [sq][side]
@@ -850,6 +839,7 @@ void make_move(uint16_t move) {
 
     // Step 2.
     
+    // NB. not using IS_CAPT macro as we don't need to check for ep.
     if (GET_CODE(move) == capture || GET_CODE(move) >= knight_promo_capture) {
         for (int bb = p; bb <= K; bb++) {
             if (bb == piece) continue;
@@ -860,7 +850,7 @@ void make_move(uint16_t move) {
         }
     }
 
-
+    // Now we check for ep.
     if (GET_CODE(move) == ep_capture) {
         if (board.side == white)
             POP_BIT(board.bitboards[p], board.enpassant - 8);

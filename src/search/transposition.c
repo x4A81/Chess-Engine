@@ -40,10 +40,8 @@ void cleanup_transposition() {
 }
 
 void clear_transposition() {
-    if (transposition_tt) {
+    if (transposition_tt)
         memset(transposition_tt, 0, table_size * sizeof(TRANSPOSITION_T));
-        table_size = 0;
-    }
 }
 
 TRANSPOSITION_T *probe_transposition(uint64_t key, int depth) {
