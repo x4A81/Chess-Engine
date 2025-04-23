@@ -61,8 +61,8 @@ uint64_t get_psuedo_attackers(int sq, int side);
 // Returns 1 if the side is in check.
 int is_check(int side);
 
-// Generates moves to a move list.
-void generate_moves(MOVE_LIST_T *move_list);
+// Generates moves to a move list and only generates captures if gen_capts is set to 1.
+void generate_moves(MOVE_LIST_T *move_list, int gen_capts);
 
 // Makes a move on the global board.
 void make_move(uint16_t move);

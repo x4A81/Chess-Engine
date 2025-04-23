@@ -112,23 +112,75 @@ static inline void sort_moves(MOVE_LIST_T *move_list, int hash_move, int ply) {
     }
 }
 
-int quiescence(int alpha, int beta) {
-    return eval();
+static inline int quiescence(int alpha, int beta) {
+    int stand_pat = eval();
+    int best_val = stand_pat;
+    if (stand_pat >= beta)
+        return stand_pat;
+    if (stand_pat > alpha)
+        alpha = stand_pat;
+
+    MOVE_LIST_T move_list;
+    generate_moves(&move_list, 1);
+    sort_moves(&move_list, 0, ply);
+    
+    // Checkmate and stalemate detection.
+    if (move_list.count == 0) {
+        // Position is checkmate or stalemate.
+
+        if (is_check(board.side))
+            return -INF; // Checkmate.
+        else
+            return 0; // Stalemate.
+    }
+
+    if (STOP_SEARCH || time_exceeded()) {
+        flags |= STOPPED_SEARCH;
+        return best_val;
+    }
+
+    for (int i = 0; i < move_list.count; i++) {
+        int move = move_list.moves[i];
+
+        SAVE_BOARD();
+        make_move(move);
+        ply++;
+        nodes++;
+
+        // Run alpha beta search.
+        int score = -quiescence(-beta, -alpha);
+        
+        ply--;
+        RESTORE_BOARD();
+
+        // Score was not properly calculated as search stopped.
+        if (flags & STOPPED_SEARCH)
+            break;
+
+        if (score >= beta)
+            return score;
+        if (score > best_val)
+            best_val = score;
+        if (score > alpha )
+            alpha = score;
+    }
+
+    return best_val;
 }
 
 static inline int negamax(int depth, int alpha, int beta) {
 
     int score = 0, node_type = LOWERBOUND;
 
+    if (depth == 0)
+    return quiescence(alpha, beta);
+    
     // If the search was stopped or time ran out.
     if (STOP_SEARCH || time_exceeded()) {
         flags |= STOPPED_SEARCH;
         return eval();
     }
-
-    if (depth == 0)
-        return quiescence(alpha, beta);
-
+    
     // Transposition table cutoffs.
     TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
     if (entry) {
@@ -141,7 +193,7 @@ static inline int negamax(int depth, int alpha, int beta) {
     }
 
     MOVE_LIST_T move_list;
-    generate_moves(&move_list);
+    generate_moves(&move_list, 0);
     sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
 
     // Checkmate and stalemate detection.
@@ -174,9 +226,9 @@ static inline int negamax(int depth, int alpha, int beta) {
         ply--;
         RESTORE_BOARD();
 
-        if (flags & STOPPED_SEARCH) {
+        // Score was not properly calculated as search stopped.
+        if (flags & STOPPED_SEARCH)
             return eval();
-        }
 
         // Fail hard beta cutoff.
         if (score >= beta) {
