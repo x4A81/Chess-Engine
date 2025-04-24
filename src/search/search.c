@@ -4,6 +4,7 @@
 #include "../../include/eval.h"
 #include "../../include/uci.h"
 #include "../../include/transposition.h"
+#include "../../include/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,7 +27,7 @@ void reset_search() {
     memset(history_moves, 0, sizeof(history_moves));
 }
 
-static inline void sort_moves(MOVE_LIST_T *move_list, int hash_move, int ply) {
+void sort_moves(MOVE_LIST_T *move_list, int hash_move, int ply) {
     /*
     1. Hash moves
     2. PV moves
@@ -112,7 +113,7 @@ static inline void sort_moves(MOVE_LIST_T *move_list, int hash_move, int ply) {
     }
 }
 
-static inline int quiescence(int alpha, int beta) {
+int quiescence(int alpha, int beta) {
     int stand_pat = eval();
     int best_val = stand_pat;
     if (stand_pat >= beta)
@@ -168,15 +169,17 @@ static inline int quiescence(int alpha, int beta) {
     return best_val;
 }
 
-static inline int negamax(int depth, int alpha, int beta) {
+int negamax(int depth, int alpha, int beta) {
 
     /*
     Search Algorithm enhancements ontop of fail-hard alpha beta:
     1. Quiescence search at horizon. 
     2. Transpotition table cutoffs.
-    3. Move ordering.
-    4. Fultility Pruning.
-    5. Principle Variation Search.
+    3. Null move reductions.
+    4. Move ordering.
+    5. Fultility Pruning.
+    6. Late move reductions.
+    7. Principle Variation Search.
     */
 
     int score = 0, node_type = (beta-alpha) > 1 ? EXACT : UPPERBOUND;
@@ -184,7 +187,7 @@ static inline int negamax(int depth, int alpha, int beta) {
     int static_eval = eval();
 
     // Step 1. Quiescence search at horizon.
-    if (depth == 0)
+    if (depth <= 0)
         return quiescence(alpha, beta);
     
     // If the search was stopped or time ran out.
@@ -204,10 +207,27 @@ static inline int negamax(int depth, int alpha, int beta) {
             return entry->score;
     }
 
+    // Step 3. Null move reductions.
+    if (!is_check(board.side)) {
+        int R = depth > 6 ? 4 : 3;
+        SAVE_BOARD();
+        make_move(0);
+        ply++;
+        nodes++;
+        score = -negamax(depth-R-1, 0-beta, 1 - beta);
+        ply--;
+        RESTORE_BOARD();
+        if (score >= beta) {
+            depth -= 4;
+            if (depth <= 0)
+                return quiescence(alpha, beta);
+        }
+    }
+
     MOVE_LIST_T move_list;
     generate_moves(&move_list, 0);
 
-    // Step 3. Move ordering.
+    // Step 4. Move ordering.
     sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
 
     // Checkmate and stalemate detection.
@@ -238,7 +258,7 @@ static inline int negamax(int depth, int alpha, int beta) {
         SAVE_BOARD();
         make_move(move);
 
-        // Step 4. Fultility pruning.
+        // Step 5. Fultility pruning.
         if (can_f_prune) {
 
             // Search moves that aren't captures or checks.
@@ -262,9 +282,16 @@ static inline int negamax(int depth, int alpha, int beta) {
             score = -negamax(depth - 1, -beta, -alpha);
         else {
 
-            // Step 5. Principle Variation Search.
-            score = -negamax(depth - 1, -(alpha + 1), -alpha);
-            if (score > alpha && score < beta)
+            // Step 6. Late move reductions. (researches if fails high)
+            int reduced = depth;
+            if (i >= 3)
+                reduced -= 2;
+
+            // Step 7. Principle Variation Search. (researches if score > alpha)
+            score = -negamax(reduced - 1, -(alpha + 1), -alpha);
+
+
+            if (score > alpha && beta - alpha > 1)
                 score = -negamax(depth - 1, -beta, -alpha);
         }
         
@@ -336,6 +363,7 @@ void search(int depth) {
     int aspiration_fails_beta = 0;
     ply = 0;
     flags = 0;
+    long long elasped = get_time_ms();
    
     // Step 1. Iterative deepening.
     for (int d = 1; d <= depth || INFINITE;) {
@@ -367,7 +395,7 @@ void search(int depth) {
         
         // Print debug info.
         if (DEBUG) {
-            printf("info depth %d nodes %d score cp %d pv ", d, nodes, score);
+            printf("info depth %d nodes %d time %lld score cp %d pv ", d, nodes, get_time_ms() - elasped, score);
             for (int i = 0; i < pv_length[0]; i++) {
                 print_move(pv_table[i]);
                 printf(" ");
@@ -378,6 +406,7 @@ void search(int depth) {
         }
         
         d++;
+        elasped = get_time_ms();
     }
 
     printf("bestmove ");

@@ -33,7 +33,7 @@ int time_exceeded() {
 }
 
 void uci_go(const char* go_string) {
-    int depth = 8;
+    int depth = 18;
     MOVETIME = 0;
     INFINITE = 0;
     STOP_SEARCH = 0;

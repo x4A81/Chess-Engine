@@ -298,7 +298,7 @@ void initialise_sliding_move_tables(int bishop_f) {
     }
 }
 
-uint64_t rook_moves(int sq, uint64_t bb) {
+static inline uint64_t rook_moves(int sq, uint64_t bb) {
 
     // Gets rook moves for a given square and blocker bitboard.
     
@@ -308,7 +308,7 @@ uint64_t rook_moves(int sq, uint64_t bb) {
     return rook_move_table[sq][bb];
 }
 
-uint64_t bishop_moves(int sq, uint64_t bb) {
+static inline uint64_t bishop_moves(int sq, uint64_t bb) {
 
     // Gets bishop moves for a given square and blocker bitboard.
 
@@ -318,7 +318,7 @@ uint64_t bishop_moves(int sq, uint64_t bb) {
     return bishop_move_table[sq][bb];
 }
 
-uint64_t queen_moves(int sq, uint64_t bb) {
+static inline uint64_t queen_moves(int sq, uint64_t bb) {
 
     // Gets queen moves for a given square and blocker bitboard.
 
@@ -815,6 +815,15 @@ void generate_moves(MOVE_LIST_T *move_list, int gen_capts) {
 }
 
 void make_move(uint16_t move) {
+
+    if (move == 0) {
+        // Skip to updating board states.
+        board.side ^= 1;
+        board.fullmove++;
+        board.enpassant = -1;
+        board.hash_key = hash_board();
+    }
+
     /*
     1. Move the piece to the new square.
     2. Handle capt
@@ -988,7 +997,7 @@ void print_move(uint16_t move) {
     }
 }
 
-void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
+static inline void add_move(MOVE_LIST_T *move_list, int from, int to, int code) {
 
     // Encodes and adds a move to a movelist.
 

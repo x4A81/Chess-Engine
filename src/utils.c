@@ -6,6 +6,7 @@
 #include "../include/search.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 int engine_initialised = 0;
 
@@ -84,4 +85,10 @@ int parse_move(char* move_string) {
 
     // Return encoded move.
     return from_sq | (to_sq << 6) | (code << 12);
+}
+
+long long get_time_ms() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (long long)(tv.tv_sec) * 1000 + (tv.tv_usec / 1000);
 }

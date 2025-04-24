@@ -53,7 +53,7 @@ typedef struct MOVE_LIST_T {
 void initialise_sliding_move_tables(int bishop_f);
 
 // Adds a move to a move list.
-void add_move(MOVE_LIST_T *move_list, int from, int to, int code);
+static inline void add_move(MOVE_LIST_T *move_list, int from, int to, int code);
 
 // Returns the psuedo legal attackers of a square belonging to side.
 uint64_t get_psuedo_attackers(int sq, int side);

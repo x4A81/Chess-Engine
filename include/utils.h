@@ -20,4 +20,7 @@ void setup_board(const char *fen);
 // Parses a move string and return the encoded move.
 int parse_move(char* move_string);
 
+// Get time in milliseconds.
+long long get_time_ms();
+
 #endif
