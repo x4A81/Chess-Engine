@@ -170,22 +170,34 @@ static inline int quiescence(int alpha, int beta) {
 
 static inline int negamax(int depth, int alpha, int beta) {
 
-    int score = 0, node_type = LOWERBOUND;
+    /*
+    Search Algorithm enhancements ontop of fail-hard alpha beta:
+    1. Quiescence search at horizon. 
+    2. Transpotition table cutoffs.
+    3. Move ordering.
+    4. Fultility Pruning.
+    5. Principle Variation Search.
+    */
 
+    int score = 0, node_type = (beta-alpha) > 1 ? EXACT : UPPERBOUND;
+    int moves_searched = 0;
+    int static_eval = eval();
+
+    // Step 1. Quiescence search at horizon.
     if (depth == 0)
-    return quiescence(alpha, beta);
+        return quiescence(alpha, beta);
     
     // If the search was stopped or time ran out.
     if (STOP_SEARCH || time_exceeded()) {
         flags |= STOPPED_SEARCH;
-        return eval();
+        return alpha;
     }
     
-    // Transposition table cutoffs.
+    // Step 2. Transposition table cutoffs.
     TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
     if (entry) {
-        if (entry->type == EXACT && entry->score)
-            score = entry->score;
+        if (entry->type == EXACT)
+            return entry->score;
         else if (entry->type == LOWERBOUND && entry->score >= beta)
             return entry->score;
         else if (entry->type == UPPERBOUND && entry->score < alpha)
@@ -194,6 +206,8 @@ static inline int negamax(int depth, int alpha, int beta) {
 
     MOVE_LIST_T move_list;
     generate_moves(&move_list, 0);
+
+    // Step 3. Move ordering.
     sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
 
     // Checkmate and stalemate detection.
@@ -209,26 +223,57 @@ static inline int negamax(int depth, int alpha, int beta) {
     // Set up PV.
     int pv_index = (ply*(2*MAX_PLY+1-ply))/2;
     int next_pv_index = pv_index + MAX_PLY - ply;
-    // pv_length[ply] = 0;
-    // pv_table[pv_index] = 0;
+
+    // Fultility pruning flags.
+    int can_f_prune = 0;
+    int fultility_margin = 125 * depth * depth;
+    if (depth <= 2)
+        can_f_prune = 1;
+    if (is_check(board.side))
+        can_f_prune = 0;
 
     for (int i = 0; i < move_list.count; i++) {
         int move = move_list.moves[i];
-
+        
         SAVE_BOARD();
         make_move(move);
+
+        // Step 4. Fultility pruning.
+        if (can_f_prune) {
+
+            // Search moves that aren't captures or checks.
+            if (!IS_CAPT(move) && !is_check(board.side)) {
+                if (static_eval + fultility_margin < alpha) {
+                    
+                    // Prune the move.
+                    RESTORE_BOARD();
+                    continue;
+                }
+                
+            }
+        }
+
         ply++;
         nodes++;
+        moves_searched++;
 
         // Run alpha beta search.
-        score = -negamax(depth - 1, -beta, -alpha);
+        if (i == 0)
+            score = -negamax(depth - 1, -beta, -alpha);
+        else {
+
+            // Step 5. Principle Variation Search.
+            score = -negamax(depth - 1, -(alpha + 1), -alpha);
+            if (score > alpha && score < beta)
+                score = -negamax(depth - 1, -beta, -alpha);
+        }
         
         ply--;
         RESTORE_BOARD();
 
         // Score was not properly calculated as search stopped.
         if (flags & STOPPED_SEARCH)
-            return eval();
+            break;
 
         // Fail hard beta cutoff.
         if (score >= beta) {
@@ -270,7 +315,8 @@ static inline int negamax(int depth, int alpha, int beta) {
         }
     }
 
-    store_transposition(board.hash_key, depth, alpha, node_type, pv_table[pv_index]);
+    if (moves_searched > 0)
+        store_transposition(board.hash_key, depth, alpha, node_type, pv_table[pv_index]);
 
     return alpha;
 }
@@ -278,21 +324,47 @@ static inline int negamax(int depth, int alpha, int beta) {
 void search(int depth) {
 
     /*
-    1. Use iterative deepening.
-    2. Call negamax search.
+    Search algorithm enhancements:
+    1. Iterative deepening.
+    2. Aspiration windows.
     */
 
     int alpha = -INF;
     int beta = INF;
+    int widening = 75;
+    int aspiration_fails_alpha = 0;
+    int aspiration_fails_beta = 0;
     ply = 0;
     flags = 0;
    
     // Step 1. Iterative deepening.
-    for (int d = 1; d <= depth || INFINITE; d++) {
+    for (int d = 1; d <= depth || INFINITE;) {
         nodes = 0;
-
+        
         int score = negamax(d, alpha, beta);
+        
+        if (STOP_SEARCH || time_exceeded())
+            break;
 
+        // Aspiration windows.
+        if (score <= alpha) {
+            aspiration_fails_alpha++;
+            alpha -= widening * aspiration_fails_alpha;
+            continue;
+        }
+
+        if (score >= beta) {
+            aspiration_fails_beta++;
+            beta += widening * aspiration_fails_beta;
+            continue;
+        }
+
+        aspiration_fails_alpha = 0;
+        aspiration_fails_beta = 0;
+
+        alpha = score - 25;
+        beta = score + 25;
+        
         // Print debug info.
         if (DEBUG) {
             printf("info depth %d nodes %d score cp %d pv ", d, nodes, score);
@@ -300,14 +372,12 @@ void search(int depth) {
                 print_move(pv_table[i]);
                 printf(" ");
             }
-
+            
             printf("\n");
             fflush(stdout);
         }
-
-        if (STOP_SEARCH || time_exceeded())
-            break;
         
+        d++;
     }
 
     printf("bestmove ");

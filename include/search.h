@@ -2,7 +2,7 @@
 #define SEARCH_H_INCLUDE
 
 #include <limits.h>
-#define INF 100000
+#define INF 10000
 #define MAX_PLY 64
 #define MAX_DEPTH 20
 
