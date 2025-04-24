@@ -180,6 +180,8 @@ int negamax(int depth, int alpha, int beta) {
     5. Fultility Pruning.
     6. Late move reductions.
     7. Principle Variation Search.
+
+    NB. Check extensions at start and when making moves.
     */
 
     int score = 0, node_type = (beta-alpha) > 1 ? EXACT : UPPERBOUND;
@@ -249,14 +251,23 @@ int negamax(int depth, int alpha, int beta) {
     int fultility_margin = 125 * depth * depth;
     if (depth <= 2)
         can_f_prune = 1;
-    if (is_check(board.side))
+        
+    if (is_check(board.side)) {
         can_f_prune = 0;
+        
+        // Check extensions.
+        depth++;
+    }
 
     for (int i = 0; i < move_list.count; i++) {
         int move = move_list.moves[i];
         
         SAVE_BOARD();
         make_move(move);
+        
+        // Check extensions.
+        if (is_check(board.side))
+            depth++;
 
         // Step 5. Fultility pruning.
         if (can_f_prune) {
