@@ -208,20 +208,8 @@ int negamax(int depth, int alpha, int beta) {
     
     // Step 2. Transposition table cutoffs.
     TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
-    if (entry) {
+    if (entry && pv_table[pv_index] != 0) {
         if (entry->type == EXACT) {
-            if (score > alpha) {
-                // Update PV table.
-                pv_table[pv_index] = entry->hash_move;
-    
-                // Propagate up pv table
-                for (int j = 0; j < pv_length[ply+1]; j++)
-                    pv_table[pv_index + j + 1] = pv_table[next_pv_index + j];
-    
-                // Update pv length
-                pv_length[ply] = pv_length[ply+1] + 1;
-    
-            }
             return entry->score;
         }
         else if (entry->type == LOWERBOUND && entry->score >= beta)
@@ -388,7 +376,7 @@ void search(int depth) {
     int aspiration_fails_alpha = 0;
     int aspiration_fails_beta = 0;
     flags = 0;
-
+    fall_back_best_move = 0;
     memset(pv_table, 0, sizeof(pv_table));
     memset(pv_length, 0, sizeof(pv_length));
 
