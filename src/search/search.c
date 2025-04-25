@@ -251,13 +251,8 @@ int negamax(int depth, int alpha, int beta) {
     int fultility_margin = 125 * depth * depth;
     if (depth <= 2)
         can_f_prune = 1;
-        
-    if (is_check(board.side)) {
+    if (is_check(board.side))
         can_f_prune = 0;
-        
-        // Check extensions.
-        depth++;
-    }
 
     for (int i = 0; i < move_list.count; i++) {
         int move = move_list.moves[i];
@@ -265,10 +260,6 @@ int negamax(int depth, int alpha, int beta) {
         SAVE_BOARD();
         make_move(move);
         
-        // Check extensions.
-        if (is_check(board.side))
-            depth++;
-
         // Step 5. Fultility pruning.
         if (can_f_prune) {
 
@@ -372,8 +363,31 @@ void search(int depth) {
     int widening = 75;
     int aspiration_fails_alpha = 0;
     int aspiration_fails_beta = 0;
-    ply = 0;
     flags = 0;
+
+    // Shift pv to remove past moves.
+    if (pv_length[0] > 0) {
+        int root_index = 0;
+        int next_root_index = MAX_PLY;
+
+        for (int i = 0; i < pv_length[0]; i++)
+            pv_table[root_index + i] = pv_table[next_root_index + i];
+
+        pv_length[0] = pv_length[1];
+    }
+
+    // Reset killer moves.
+    memset(killer_moves, 0, sizeof(killer_moves));
+
+    // Decay history heuristic.
+    for (int side = 0; side < 2; side++) {
+        for (int from = 0; from < 64; from++) {
+            for (int to = 0; to < 64; to++) {
+                history_moves[side][from][to] /= 2;
+            }
+        }
+    }
+
     long long elasped = get_time_ms();
    
     // Step 1. Iterative deepening.

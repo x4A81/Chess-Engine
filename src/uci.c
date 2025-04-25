@@ -13,7 +13,7 @@ volatile int DEBUG = 0;
 volatile int STOP_SEARCH = 0;
 volatile int INFINITE = 0;
 int MOVETIME = 0;
-__ssize_t transposition_size = 32LL * 1024 * 1024 * 1024;
+__ssize_t transposition_size = 32LL * 1024 * 1024;
 
 float W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
 clock_t start_time;
@@ -93,7 +93,7 @@ void parse_uci(const char* uci_string) {
     if (strcmp(uci_string, "uci") == 0) {
         printf("id name CHESS_ENGINE\n");
         printf("id author x4A81\n");
-        printf("option name Hash type spin default 32 min 64 max 16\n");
+        printf("option name Hash type spin default 32 min 16 max 64\n");
         printf("uciok\n");
     }
 
@@ -160,8 +160,11 @@ void parse_uci(const char* uci_string) {
         print_board();
 
     else if (strncmp(uci_string, "setoption", 9) == 0) {
-        if (strncmp(uci_string + 10, "name Hash value", 15) == 0)
-            transposition_size = atoll(uci_string + 26) * 1024 * 1024 * 1024;
+        if (strncmp(uci_string + 10, "name Hash value", 15) == 0) {
+            long long size = atoll(uci_string + 26);
+            if (size < 16 || size > 64) size = 32;
+            transposition_size = size * 1024 * 1024;
+        }
     }
     
     else
