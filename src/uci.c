@@ -25,7 +25,7 @@ void* start_search_thread(void* arg) {
     free(arg);
     if (MOVETIME == 0) {
         int timer = (board.side == white) ? W_TIME : B_TIME;
-        timer /= MOVESTOGO;
+        timer /= (MOVESTOGO == 0) ? 40 : MOVESTOGO;
         timer -= 50;
         TIME_FOR_MOVE = timer;
     } else 
