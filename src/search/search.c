@@ -13,6 +13,7 @@ int pv_table[(MAX_PLY*MAX_PLY+MAX_PLY)/2];
 int pv_length[MAX_PLY];
 int killer_moves[MAX_PLY][2] = { 0 };
 int history_moves[2][64][64] = { 0 };
+int fall_back_best_move = 0;
 
 // Flags
 int flags = 0;
@@ -188,6 +189,13 @@ int negamax(int depth, int alpha, int beta) {
     int moves_searched = 0;
     int static_eval = eval();
 
+    // Fall back if pv is empty.
+    int best_score = -INF;
+
+    // Set up PV.
+    int pv_index = (ply*(2*MAX_PLY+1-ply))/2;
+    int next_pv_index = pv_index + MAX_PLY - ply;
+
     // Step 1. Quiescence search at horizon.
     if (depth <= 0)
         return quiescence(alpha, beta);
@@ -201,8 +209,21 @@ int negamax(int depth, int alpha, int beta) {
     // Step 2. Transposition table cutoffs.
     TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
     if (entry) {
-        if (entry->type == EXACT)
+        if (entry->type == EXACT) {
+            if (score > alpha) {
+                // Update PV table.
+                pv_table[pv_index] = entry->hash_move;
+    
+                // Propagate up pv table
+                for (int j = 0; j < pv_length[ply+1]; j++)
+                    pv_table[pv_index + j + 1] = pv_table[next_pv_index + j];
+    
+                // Update pv length
+                pv_length[ply] = pv_length[ply+1] + 1;
+    
+            }
             return entry->score;
+        }
         else if (entry->type == LOWERBOUND && entry->score >= beta)
             return entry->score;
         else if (entry->type == UPPERBOUND && entry->score < alpha)
@@ -242,16 +263,14 @@ int negamax(int depth, int alpha, int beta) {
             return 0; // Stalemate.
     }
 
-    // Set up PV.
-    int pv_index = (ply*(2*MAX_PLY+1-ply))/2;
-    int next_pv_index = pv_index + MAX_PLY - ply;
-
     // Fultility pruning flags.
     int can_f_prune = 0;
     int fultility_margin = 125 * depth * depth;
     if (depth <= 2)
         can_f_prune = 1;
     if (is_check(board.side))
+        can_f_prune = 0;
+    if (pv_length[ply] == 0)
         can_f_prune = 0;
 
     for (int i = 0; i < move_list.count; i++) {
@@ -299,6 +318,11 @@ int negamax(int depth, int alpha, int beta) {
         
         ply--;
         RESTORE_BOARD();
+
+        if (score > best_score && ply == 0) {
+            best_score = score;
+            fall_back_best_move = move;
+        }
 
         // Score was not properly calculated as search stopped.
         if (flags & STOPPED_SEARCH)
@@ -365,16 +389,8 @@ void search(int depth) {
     int aspiration_fails_beta = 0;
     flags = 0;
 
-    // Shift pv to remove past moves.
-    if (pv_length[0] > 0) {
-        int root_index = 0;
-        int next_root_index = MAX_PLY;
-
-        for (int i = 0; i < pv_length[0]; i++)
-            pv_table[root_index + i] = pv_table[next_root_index + i];
-
-        pv_length[0] = pv_length[1];
-    }
+    memset(pv_table, 0, sizeof(pv_table));
+    memset(pv_length, 0, sizeof(pv_length));
 
     // Reset killer moves.
     memset(killer_moves, 0, sizeof(killer_moves));
@@ -418,24 +434,24 @@ void search(int depth) {
         alpha = score - 25;
         beta = score + 25;
         
-        // Print debug info.
-        if (DEBUG) {
-            printf("info depth %d nodes %d time %lld score cp %d pv ", d, nodes, get_time_ms() - elasped, score);
-            for (int i = 0; i < pv_length[0]; i++) {
-                print_move(pv_table[i]);
-                printf(" ");
-            }
-            
-            printf("\n");
-            fflush(stdout);
+        printf("info depth %d nodes %d time %lld score cp %d pv ", d, nodes, get_time_ms() - elasped, score);
+        for (int i = 0; i < pv_length[0]; i++) {
+            print_move(pv_table[i]);
+            printf(" ");
         }
+        
+        printf("\n");
+        fflush(stdout);
         
         d++;
         elasped = get_time_ms();
     }
 
     printf("bestmove ");
-    print_move(pv_table[0]);
+    if (pv_table[0] == 0)
+        print_move(fall_back_best_move);
+    else
+        print_move(pv_table[0]);
     printf("\n");
     fflush(stdout);
 }

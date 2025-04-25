@@ -12,24 +12,40 @@
 volatile int DEBUG = 0;
 volatile int STOP_SEARCH = 0;
 volatile int INFINITE = 0;
-int MOVETIME = 0;
+int MOVESTOGO = 0;
+int MOVETIME = 0; // what the gui specifies.
+int TIME_FOR_MOVE; // What the engine determines.
 __ssize_t transposition_size = 32LL * 1024 * 1024;
 
-float W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
+int W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
 clock_t start_time;
 
 void* start_search_thread(void* arg) {
     int depth = *((int*)arg);
     free(arg);
+    if (MOVETIME == 0) {
+        int timer = (board.side == white) ? W_TIME : B_TIME;
+        timer /= MOVESTOGO;
+        timer -= 50;
+        TIME_FOR_MOVE = timer;
+    } else 
+        TIME_FOR_MOVE = MOVETIME;
+
     start_time = clock();
     search(depth);
+
+    if (board.side == white)
+        W_TIME += W_INC - TIME_FOR_MOVE;
+    else
+        B_TIME += B_INC - TIME_FOR_MOVE;
+
     return NULL;
 }
 
 int time_exceeded() {
-    if (MOVETIME == 0) return 0;
+    if (TIME_FOR_MOVE == 0) return 0;
     clock_t now = clock();
-    return ((now - start_time) * 1000 / CLOCKS_PER_SEC) >= MOVETIME;
+    return ((now - start_time) * 1000 / CLOCKS_PER_SEC) >= TIME_FOR_MOVE;
 }
 
 void uci_go(const char* go_string) {
@@ -50,6 +66,10 @@ void uci_go(const char* go_string) {
         
         } else if (strcmp(tok, "infinite") == 0) {
             INFINITE = 1;
+
+        } else if (strcmp(tok, "movestogo") == 0) {
+            tok = strtok(NULL, " ");
+            if (tok) MOVESTOGO = atoi(tok);
         
         } else if (strcmp(tok, "wtime") == 0) {
             tok = strtok(NULL, " ");
