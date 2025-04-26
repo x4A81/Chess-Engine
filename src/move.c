@@ -962,8 +962,8 @@ void make_move(uint16_t move) {
 
 
     // Step 7.
+    if (board.side == black) board.fullmove++;
     board.side ^= 1;
-    board.fullmove++;
 
     if (GET_CODE(move) == capture || piece == p || piece == P)
         board.halfmove = 0;

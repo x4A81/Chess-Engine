@@ -15,6 +15,8 @@ int killer_moves[MAX_PLY][2] = { 0 };
 int history_moves[2][64][64] = { 0 };
 int fall_back_best_move = 0;
 
+uint64_t repetition_his[MAX_PLY];
+
 // Flags
 int flags = 0;
 #define STOPPED_SEARCH 0b1
@@ -174,20 +176,26 @@ int negamax(int depth, int alpha, int beta) {
 
     /*
     Search Algorithm enhancements ontop of fail-hard alpha beta:
-    1. Quiescence search at horizon. 
-    2. Transpotition table cutoffs.
-    3. Null move reductions.
-    4. Move ordering.
-    5. Fultility Pruning.
-    6. Late move reductions.
-    7. Principle Variation Search.
+    1. Quiescence search at horizon.
+    2. Repetition Check.
+    3. Transpotition table cutoffs.
+    4. Null move reductions.
+    5. Move ordering.
+    6. Fultility Pruning.
+    7. Late move reductions.
+    8. Principle Variation Search.
 
     NB. Check extensions at start and when making moves.
     */
 
+    // Quiescence search at horizon.
+    if (depth <= 0)
+        return quiescence(alpha, beta);
+
     int score = 0, node_type = (beta-alpha) > 1 ? EXACT : UPPERBOUND;
     int moves_searched = 0;
     int static_eval = eval();
+    int draw_score = -eval() / 2;
 
     // Fall back if pv is empty.
     int best_score = -INF;
@@ -196,29 +204,46 @@ int negamax(int depth, int alpha, int beta) {
     int pv_index = (ply*(2*MAX_PLY+1-ply))/2;
     int next_pv_index = pv_index + MAX_PLY - ply;
 
-    // Step 1. Quiescence search at horizon.
-    if (depth <= 0)
-        return quiescence(alpha, beta);
+    // Generate moves.
+    MOVE_LIST_T move_list;
+    generate_moves(&move_list, 0);
+
+    // Checkmate and stalemate detection.
+    if (move_list.count == 0) {
+        // Position is checkmate or stalemate.
+
+        if (is_check(board.side))
+            return -INF; // Checkmate.
+        else
+            return draw_score; // Stalemate.
+    }
+
+    if (ply - 2 >= 0) {
+        if (repetition_his[ply-2] == board.hash_key)
+            return draw_score;
+    }
+
+    if (board.halfmove >= 50)
+        return draw_score;
     
+    // Transposition table cutoffs.
+    TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
+    if (entry && pv_table[pv_index] != 0) {
+        if (entry->type == EXACT)
+        return entry->score;
+        else if (entry->type == LOWERBOUND && entry->score >= beta)
+        return entry->score;
+        else if (entry->type == UPPERBOUND && entry->score < alpha)
+        return entry->score;
+    }
+
     // If the search was stopped or time ran out.
     if (STOP_SEARCH || time_exceeded()) {
         flags |= STOPPED_SEARCH;
         return alpha;
     }
-    
-    // Step 2. Transposition table cutoffs.
-    TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
-    if (entry && pv_table[pv_index] != 0) {
-        if (entry->type == EXACT) {
-            return entry->score;
-        }
-        else if (entry->type == LOWERBOUND && entry->score >= beta)
-            return entry->score;
-        else if (entry->type == UPPERBOUND && entry->score < alpha)
-            return entry->score;
-    }
 
-    // Step 3. Null move reductions.
+    // Null move reductions.
     if (!is_check(board.side)) {
         int R = depth > 6 ? 4 : 3;
         SAVE_BOARD();
@@ -235,30 +260,13 @@ int negamax(int depth, int alpha, int beta) {
         }
     }
 
-    MOVE_LIST_T move_list;
-    generate_moves(&move_list, 0);
-
-    // Step 4. Move ordering.
+    // Move ordering.
     sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
 
-    // Checkmate and stalemate detection.
-    if (move_list.count == 0) {
-        // Position is checkmate or stalemate.
-
-        if (is_check(board.side))
-            return -INF; // Checkmate.
-        else
-            return 0; // Stalemate.
-    }
-
     // Fultility pruning flags.
-    int can_f_prune = 0;
+    int can_f_prune = 1;
     int fultility_margin = 125 * depth * depth;
-    if (depth <= 2)
-        can_f_prune = 1;
-    if (is_check(board.side))
-        can_f_prune = 0;
-    if (pv_length[ply] == 0)
+    if (depth > 2 || is_check(board.side) || pv_table[pv_index] == 0)
         can_f_prune = 0;
 
     for (int i = 0; i < move_list.count; i++) {
@@ -267,7 +275,7 @@ int negamax(int depth, int alpha, int beta) {
         SAVE_BOARD();
         make_move(move);
         
-        // Step 5. Fultility pruning.
+        // Fultility pruning.
         if (can_f_prune) {
 
             // Search moves that aren't captures or checks.
@@ -281,25 +289,26 @@ int negamax(int depth, int alpha, int beta) {
                 
             }
         }
-
+        
         ply++;
         nodes++;
         moves_searched++;
+        repetition_his[ply] = board.hash_key;
 
         // Run alpha beta search.
         if (i == 0)
             score = -negamax(depth - 1, -beta, -alpha);
         else {
 
-            // Step 6. Late move reductions. (researches if fails high)
+            // Late move reductions. (researches if fails high)
             int reduced = depth;
             if (i >= 3)
                 reduced -= 2;
 
-            // Step 7. Principle Variation Search. (researches if score > alpha)
+            // Principle Variation Search. (researches if score > alpha)
             score = -negamax(reduced - 1, -(alpha + 1), -alpha);
 
-
+            // Research position.
             if (score > alpha && beta - alpha > 1)
                 score = -negamax(depth - 1, -beta, -alpha);
         }
