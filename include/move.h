@@ -7,7 +7,7 @@
 #define GET_FROM(move) (move & 0b111111)
 #define GET_TO(move) ((move >> 6) & 0b111111)
 #define GET_CODE(move) ((move >> 12) & 0b1111)
-#define IS_CAPT(move) (move & 0b100)
+#define IS_CAPT(move) ((move >> 12) & 0b100)
 
 typedef enum MOVE_TYPES {
     quiet, dbl_pawn, king_castle, queen_castle, capture, ep_capture,
@@ -62,7 +62,7 @@ uint64_t get_psuedo_attackers(int sq, int side);
 int is_check(int side);
 
 // Generates moves to a move list and only generates captures if gen_capts is set to 1.
-void generate_moves(MOVE_LIST_T *move_list, int gen_capts);
+void generate_moves(MOVE_LIST_T *move_list);
 
 // Makes a move on the global board.
 void make_move(uint16_t move);

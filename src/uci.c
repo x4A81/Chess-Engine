@@ -4,6 +4,7 @@
 #include "../include/board.h"
 #include "../include/search.h"
 #include "../tests/test.h"
+#include "../include/eval.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -14,22 +15,26 @@ volatile int STOP_SEARCH = 0;
 volatile int INFINITE = 0;
 int MOVESTOGO = 0;
 int MOVETIME = 0; // what the gui specifies.
-int TIME_FOR_MOVE; // What the engine determines.
+int TIME_FOR_MOVE = 0; // What the engine determines.
 __ssize_t transposition_size = 32LL * 1024 * 1024;
 
 int W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
 clock_t start_time;
 
+int depth_search = 0;
+
 void* start_search_thread(void* arg) {
     int depth = *((int*)arg);
     free(arg);
-    if (MOVETIME == 0) {
-        int timer = (board.side == white) ? W_TIME : B_TIME;
-        timer /= (MOVESTOGO == 0) ? 40 : MOVESTOGO;
-        timer -= 50;
-        TIME_FOR_MOVE = timer;
-    } else 
-        TIME_FOR_MOVE = MOVETIME;
+    if (depth_search == 0) {
+        if (MOVETIME == 0) {
+            int timer = (board.side == white) ? W_TIME : B_TIME;
+            timer /= (MOVESTOGO == 0) ? 40 : MOVESTOGO;
+            timer -= 50;
+            TIME_FOR_MOVE = timer;
+        } else 
+            TIME_FOR_MOVE = MOVETIME;
+    }
 
     start_time = clock();
     search(depth);
@@ -53,12 +58,14 @@ void uci_go(const char* go_string) {
     MOVETIME = 0;
     INFINITE = 0;
     STOP_SEARCH = 0;
+    depth_search = 0;
 
     const char* tok = strtok((char*)go_string, " ");
     while (tok != NULL) {
         if (strcmp(tok, "depth") == 0) {
             tok = strtok(NULL, " ");
             if (tok) depth = atoi(tok);
+            depth_search = 1;
 
         } else if (strcmp(tok, "movetime") == 0) {
             tok = strtok(NULL, " ");
@@ -66,6 +73,7 @@ void uci_go(const char* go_string) {
         
         } else if (strcmp(tok, "infinite") == 0) {
             INFINITE = 1;
+            depth_search = 1;
 
         } else if (strcmp(tok, "movestogo") == 0) {
             tok = strtok(NULL, " ");
@@ -93,7 +101,10 @@ void uci_go(const char* go_string) {
                 perft_test(atoi(tok), atoi(tok), 0);
                 return;
             }
-        } 
+        } else if (strcmp(tok, "eval") == 0) {
+            printf("cp: %d\n", eval());
+            return;
+        }
 
         tok = strtok(NULL, " ");
     }

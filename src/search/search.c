@@ -16,18 +16,33 @@ int history_moves[2][64][64] = { 0 };
 int fall_back_best_move = 0;
 
 uint64_t repetition_his[MAX_PLY];
+int repetition_his_length = 0;
 
 // Flags
 int flags = 0;
 #define STOPPED_SEARCH 0b1
 
+static inline int is_repetition() {
+    if (board.halfmove >= 50)
+        return 1;
+
+    for (int i = 0; i <= repetition_his_length - 2; i++) {
+        if (repetition_his[i] == board.hash_key)
+            return 1;
+    }
+
+    return 0;
+}
+
 void reset_search() {
     ply = 0;
     nodes = 0;
+    repetition_his_length = 0;
     memset(pv_table, 0, sizeof(pv_table));
     memset(pv_length, 0, sizeof(pv_length));
     memset(killer_moves, 0, sizeof(killer_moves));
     memset(history_moves, 0, sizeof(history_moves));
+    memset(repetition_his, 0, sizeof(repetition_his));
 }
 
 void sort_moves(MOVE_LIST_T *move_list, int hash_move, int ply) {
@@ -125,7 +140,7 @@ int quiescence(int alpha, int beta) {
         alpha = stand_pat;
 
     MOVE_LIST_T move_list;
-    generate_moves(&move_list, 1);
+    generate_moves(&move_list);
     sort_moves(&move_list, 0, ply);
     
     // Checkmate and stalemate detection.
@@ -145,6 +160,8 @@ int quiescence(int alpha, int beta) {
 
     for (int i = 0; i < move_list.count; i++) {
         int move = move_list.moves[i];
+        if (!IS_CAPT(move))
+            continue;
 
         SAVE_BOARD();
         make_move(move);
@@ -206,7 +223,7 @@ int negamax(int depth, int alpha, int beta) {
 
     // Generate moves.
     MOVE_LIST_T move_list;
-    generate_moves(&move_list, 0);
+    generate_moves(&move_list);
 
     // Checkmate and stalemate detection.
     if (move_list.count == 0) {
@@ -218,23 +235,18 @@ int negamax(int depth, int alpha, int beta) {
             return draw_score; // Stalemate.
     }
 
-    if (ply - 2 >= 0) {
-        if (repetition_his[ply-2] == board.hash_key)
-            return draw_score;
-    }
-
-    if (board.halfmove >= 50)
+    if (is_repetition())
         return draw_score;
-    
+
     // Transposition table cutoffs.
     TRANSPOSITION_T *entry = probe_transposition(board.hash_key, depth);
     if (entry && pv_table[pv_index] != 0) {
         if (entry->type == EXACT)
-        return entry->score;
+            return entry->score;
         else if (entry->type == LOWERBOUND && entry->score >= beta)
-        return entry->score;
+            return entry->score;
         else if (entry->type == UPPERBOUND && entry->score < alpha)
-        return entry->score;
+            return entry->score;
     }
 
     // If the search was stopped or time ran out.
@@ -243,6 +255,9 @@ int negamax(int depth, int alpha, int beta) {
         return alpha;
     }
 
+    // Move ordering.
+    sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
+    
     // Null move reductions.
     if (!is_check(board.side)) {
         int R = depth > 6 ? 4 : 3;
@@ -259,10 +274,7 @@ int negamax(int depth, int alpha, int beta) {
                 return quiescence(alpha, beta);
         }
     }
-
-    // Move ordering.
-    sort_moves(&move_list, entry ? entry->hash_move : 0, ply);
-
+    
     // Fultility pruning flags.
     int can_f_prune = 1;
     int fultility_margin = 125 * depth * depth;
@@ -294,6 +306,7 @@ int negamax(int depth, int alpha, int beta) {
         nodes++;
         moves_searched++;
         repetition_his[ply] = board.hash_key;
+        repetition_his_length = ply;
 
         // Run alpha beta search.
         if (i == 0)
@@ -314,6 +327,7 @@ int negamax(int depth, int alpha, int beta) {
         }
         
         ply--;
+        repetition_his_length = ply;
         RESTORE_BOARD();
 
         if (score > best_score && ply == 0) {
@@ -355,13 +369,13 @@ int negamax(int depth, int alpha, int beta) {
             // Update PV table.
             pv_table[pv_index] = move;
 
-            // Propagate up pv table
-            for (int j = 0; j < pv_length[ply+1]; j++)
-                pv_table[pv_index + j + 1] = pv_table[next_pv_index + j];
-
-            // Update pv length
-            pv_length[ply] = pv_length[ply+1] + 1;
-
+            if (pv_length[ply + 1] > 0) {
+                // Propagate up pv table
+                for (int j = 0; j < pv_length[ply+1]; j++)
+                    pv_table[pv_index + j + 1] = pv_table[next_pv_index + j];
+                pv_length[ply] = pv_length[ply+1] + 1;
+            } else
+                pv_length[ply] = 1;
         }
     }
 

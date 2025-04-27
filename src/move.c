@@ -363,7 +363,7 @@ int is_check(int side) {
     return (attack_bb != 0);
 }
 
-void generate_moves(MOVE_LIST_T *move_list, int gen_capts) {
+void generate_moves(MOVE_LIST_T *move_list) {
     move_list->count = 0;
 
     /*
@@ -377,7 +377,7 @@ void generate_moves(MOVE_LIST_T *move_list, int gen_capts) {
     int king_sq = -1, from_sq = -1, to_sq = -1, i = 0;
     uint64_t attack_bb = UINT64_C(0), piece_bb = UINT64_C(0),
     capture_mask = UINT64_C(0xFFFFFFFFFFFFFFFF),
-    push_mask = (gen_capts == 0) ? UINT64_C(0xFFFFFFFFFFFFFFFF) : UINT64_C(0);
+    push_mask = UINT64_C(0xFFFFFFFFFFFFFFFF);
     
     // Step 1. Detect legal king moves.
 
@@ -446,32 +446,29 @@ void generate_moves(MOVE_LIST_T *move_list, int gen_capts) {
 
         push_mask = 0ULL;
 
-        if (!gen_capts) {
+        // Calculate bishop, rook and queen rays that attack the king. (push mask)
+        attack_bb = attacking_bishops & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+            POP_BIT(attack_bb, slider);
+        }
 
-            // Calculate bishop, rook and queen rays that attack the king. (push mask)
-            attack_bb = attacking_bishops & checkers;
-            while (attack_bb) {
-                slider = ls1b(attack_bb);
-                push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
-                POP_BIT(attack_bb, slider);
-            }
+        attack_bb = attacking_rooks & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            push_mask |= rook_moves(slider, board.bitboards[14]) & king_rook_rays;
+            POP_BIT(attack_bb, slider);
+        }
 
-            attack_bb = attacking_rooks & checkers;
-            while (attack_bb) {
-                slider = ls1b(attack_bb);
+        attack_bb = attacking_queens & checkers;
+        while (attack_bb) {
+            slider = ls1b(attack_bb);
+            if (rook_moves(slider, board.bitboards[14]) & (1ULL << king_sq))
                 push_mask |= rook_moves(slider, board.bitboards[14]) & king_rook_rays;
-                POP_BIT(attack_bb, slider);
-            }
-
-            attack_bb = attacking_queens & checkers;
-            while (attack_bb) {
-                slider = ls1b(attack_bb);
-                if (rook_moves(slider, board.bitboards[14]) & (1ULL << king_sq))
-                    push_mask |= rook_moves(slider, board.bitboards[14]) & king_rook_rays;
-                else
-                    push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
-                POP_BIT(attack_bb, slider);
-            }
+            else
+                push_mask |= bishop_moves(slider, board.bitboards[14]) & king_bishop_rays;
+            POP_BIT(attack_bb, slider);
         }
     }
 

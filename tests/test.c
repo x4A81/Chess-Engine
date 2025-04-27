@@ -13,7 +13,7 @@ void perft(int depth) {
     }
 
     MOVE_LIST_T moves;
-    generate_moves(&moves, 0);
+    generate_moves(&moves);
 
     // The position is stalemate or checkmate.
     if (moves.count == 0){
@@ -36,7 +36,7 @@ void perft_divide(int depth) {
     }
 
     MOVE_LIST_T moves;
-    generate_moves(&moves, 0);
+    generate_moves(&moves);
 
     // The position is stalemate or checkmate.
     if (moves.count == 0){
