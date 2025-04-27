@@ -76,10 +76,12 @@ int parse_move(char* move_string) {
     }
 
     if ((board.bitboards[k] | board.bitboards[K]) & (1ULL << from_sq)) {
-        if (to_sq == g1 || to_sq == g8)
-            code = 2;
-        else if (to_sq == c1 || to_sq == c8)
-            code = 3;
+        if (from_sq == e1 || from_sq == e8) {
+            if (to_sq == g1 || to_sq == g8)
+                code = 2;
+            else if (to_sq == c1 || to_sq == c8)
+                code = 3;
+        }
     }
 
 
