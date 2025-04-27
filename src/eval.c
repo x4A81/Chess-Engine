@@ -7,98 +7,53 @@
 #define MIDDLE_GAME 0
 #define END_GAME 1
 
-int material_value[12] = {-100, -320, -330, -500, -900, -1000, 100, 320, 330, 500, 900, 1000};
-
-int pawn_psqt[64] = {
- 0,  0,  0,  0,  0,  0,  0,  0,
-50, 50, 50, 50, 50, 50, 50, 50,
-10, 10, 20, 30, 30, 20, 10, 10,
- 5,  5, 10, 25, 25, 10,  5,  5,
- 0,  0,  0, 20, 20,  0,  0,  0,
- 5, -5,-10,  0,  0,-10, -5,  5,
- 5, 10, 10,-20,-20, 10, 10,  5,
- 0,  0,  0,  0,  0,  0,  0,  0
-};
-
-int knight_psqt[64] = {
--50,-20,-30,-30,-30,-30,-20,-50,
--40,-20,  0,  0,  0,  0,-20,-40,
--30,  7, 13, 10, 10, 13,  7,-30,
--30,  2, 12, 17, 17, 12,  2,-30,
--30,  0, 12, 17, 17, 12,  0,-30,
--30,  7, 13, 10, 10, 13,  7,-30,
--40,-20,  0,  5,  5,  0,-20,-40,
--50,-20,-30,-30,-30,-30,-20,-50,
-};
-
-int bishop_psqt[64] = {
--20,-10,-10,-10,-10,-10,-10,-20,
--10,  0,  0,  0,  0,  0,  0,-10,
--10,  0,  5, 10, 10,  5,  0,-10,
--10,  5,  5, 10, 10,  5,  5,-10,
--10,  0, 12, 10, 10, 12,  0,-10,
--10, 10,  7, 12, 12,  7, 10,-10,
--10,  5,  0,  0,  0,  0,  5,-10,
--20,-10,-10,-10,-10,-10,-10,-20,
-};
-
-int rook_psqt[64] = {
- 0,  0,  0,  0,  0,  0,  0,  0,
- 5, 10, 10, 10, 10, 10, 10,  5,
--5,  0,  0,  0,  0,  0,  0, -5,
--5,  0,  0,  0,  0,  0,  0, -5,
--5,  0,  0,  0,  0,  0,  0, -5,
--5,  0,  0,  0,  0,  0,  0, -5,
--5,  0,  0,  0,  0,  0,  0, -5,
- 0,  0,  0,  5,  5,  0,  0,  0
-};
-
-int queen_psqt[64] = {
--20,-10,-10, -5, -5,-10,-10,-20,
--10,  0,  0,  0,  0,  0,  0,-10,
--10,  0,  5,  5,  5,  5,  0,-10,
- -5,  0,  5,  5,  5,  5,  0, -5,
-  0,  0,  5,  5,  5,  5,  0, -5,
--10,  5,  5,  5,  5,  5,  0,-10,
--10,  0,  5,  0,  0,  0,  0,-10,
--20,-10,-10, -5, -5,-10,-10,-20
-};
-
-int king_psqt[2][64] = {
-{
--30,-40,-40,-50,-50,-40,-40,-30,
--30,-40,-40,-50,-50,-40,-40,-30,
--30,-40,-40,-50,-50,-40,-40,-30,
--30,-40,-40,-50,-50,-40,-40,-30,
--20,-30,-30,-40,-40,-30,-30,-20,
--10,-20,-20,-20,-20,-20,-20,-10,
- 20, 20, -5, -5, -5, -5, 20, 20,
- 20, 30, 10,  0,  0, 10, 30, 20
-},
-{
--50,-40,-30,-20,-20,-30,-40,-50,
--30,-20,-10,  0,  0,-10,-20,-30,
--30,-10, 20, 30, 30, 20,-10,-30,
--30,-10, 30, 40, 40, 30,-10,-30,
--30,-10, 30, 40, 40, 30,-10,-30,
--30,-10, 20, 30, 30, 20,-10,-30,
--30,-30,  0,  0,  0,  0,-30,-30,
--50,-30,-30,-30,-30,-30,-30,-50
+// Pawn Eval helpers
+static inline uint64_t north_fill(uint64_t gen) {
+    gen |= (gen << 8);
+    gen |= (gen << 16);
+    gen |= (gen << 32);
+    return gen;
 }
-};
 
-static inline int evaluate_pawns() {
+static inline uint64_t south_fill(uint64_t gen) {
+    gen |= (gen >> 8);
+    gen |= (gen >> 16);
+    gen |= (gen >> 32);
+    return gen;
+}
+
+static inline uint64_t file_fill(uint64_t gen) { return north_fill(gen) | south_fill(gen); }
+
+static inline uint64_t wfront_span(uint64_t wpawns) { return north_fill(wpawns) << 8; }
+static inline uint64_t brear_span(uint64_t bpawns) { return north_fill(bpawns) << 8; }
+static inline uint64_t bfront_span(uint64_t bpawns) { return south_fill(bpawns) >> 8; }
+static inline uint64_t wrear_span(uint64_t wpawns) { return south_fill(wpawns) >> 8; }
+
+int evaluate_pawns() {
     int pawn_score = 0;
     uint64_t pawn_bb;
-    
+
+    int pawn_psqt[64] = {
+        0,  0,  0,  0,  0,  0,  0,  0,
+       50, 50, 50, 50, 50, 50, 50, 50,
+       10, 10, 20, 30, 30, 20, 10, 10,
+        5,  5, 10, 25, 25, 10,  5,  5,
+        0,  0,  0, 20, 20,  0,  0,  0,
+        5, -5,-10,  0,  0,-10, -5,  5,
+        5, 10, 10,-20,-20, 10, 10,  5,
+        0,  0,  0,  0,  0,  0,  0,  0
+    };
+
     /*
     1. Evaluate Material
     2. Piece Square Tables
+    3. Doubled & Tripled Pawns
     */
 
     // Material
-    pawn_score += pop_count(board.bitboards[p]) * material_value[p];
-    pawn_score += pop_count(board.bitboards[P]) * material_value[P];
+    int material = 100;
+    pawn_score -= pop_count(board.bitboards[p]) * material;
+    pawn_score += pop_count(board.bitboards[P]) * material;
     
     // Piece Square Tables
     pawn_bb = board.bitboards[p];
@@ -108,21 +63,54 @@ static inline int evaluate_pawns() {
         pawn_score -= pawn_psqt[sq];
     }
 
-    // printf("%d\n", pawn_score);
     pawn_bb = board.bitboards[P];
     while (pawn_bb) {
         int sq = ls1b(pawn_bb);
         POP_BIT(pawn_bb, sq);
         pawn_score += pawn_psqt[sq ^ 56]; // Flip square
-        // printf("sq: %d, score: %d\n", sq, pawn_psqt[sq ^ 56]);
     }
+
+    // Double & Triple pawns
+    int doubled_penalty = -80, tripled_penalty = -100;
+
+    // Doubled
+    uint64_t wpawns_infront_behind = board.bitboards[P] & wrear_span(board.bitboards[P]);
+    uint64_t bpawns_infront_behind = board.bitboards[p] & brear_span(board.bitboards[p]);
+    int num_doubled = pop_count(wpawns_infront_behind) / 2;
+    pawn_score += doubled_penalty;
+
+    num_doubled = pop_count(bpawns_infront_behind) / 2;
+    pawn_score -= doubled_penalty;
+
+    // Triples
+    wpawns_infront_behind &= board.bitboards[P] & wfront_span(board.bitboards[P]);
+    bpawns_infront_behind &= board.bitboards[p] & bfront_span(board.bitboards[p]);
+    uint64_t file_with_triple = file_fill(wpawns_infront_behind);
+
+    int num_triples = pop_count(file_with_triple) / 3;
+    pawn_score += tripled_penalty;
+
+    file_with_triple = file_fill(bpawns_infront_behind);
+    num_triples = pop_count(file_with_triple) / 3;
+    pawn_score -= tripled_penalty;
 
     return pawn_score;
 }
 
-static inline int evaluate_knights() {
+int evaluate_knights() {
     int knight_score = 0;
     uint64_t knight_bb;
+
+    int knight_psqt[64] = {
+        -50,-20,-30,-30,-30,-30,-20,-50,
+        -40,-20,  0,  0,  0,  0,-20,-40,
+        -30,  7, 13, 10, 10, 13,  7,-30,
+        -30,  2, 12, 17, 17, 12,  2,-30,
+        -30,  0, 12, 17, 17, 12,  0,-30,
+        -30,  7, 13, 10, 10, 13,  7,-30,
+        -40,-20,  0,  5,  5,  0,-20,-40,
+        -50,-20,-30,-30,-30,-30,-20,-50,
+    };
     
     /*
     1. Evaluate Material
@@ -130,8 +118,9 @@ static inline int evaluate_knights() {
     */
 
     // Material
-    knight_score += pop_count(board.bitboards[n]) * material_value[n];
-    knight_score += pop_count(board.bitboards[N]) * material_value[N];
+    int material = 320;
+    knight_score -= pop_count(board.bitboards[n]) * material;
+    knight_score += pop_count(board.bitboards[N]) * material;
     
     // Piece Square Tables
     knight_bb = board.bitboards[n];
@@ -151,9 +140,20 @@ static inline int evaluate_knights() {
     return knight_score;
 }
 
-static inline int evaluate_bishops() {
+int evaluate_bishops() {
     int bishop_score = 0;
     uint64_t bishop_bb;
+
+    int bishop_psqt[64] = {
+        -20,-10,-10,-10,-10,-10,-10,-20,
+        -10,  0,  0,  0,  0,  0,  0,-10,
+        -10,  0,  5, 10, 10,  5,  0,-10,
+        -10,  5,  5, 10, 10,  5,  5,-10,
+        -10,  0, 12, 10, 10, 12,  0,-10,
+        -10, 10,  7, 12, 12,  7, 10,-10,
+        -10,  5,  0,  0,  0,  0,  5,-10,
+        -20,-10,-10,-10,-10,-10,-10,-20,
+    };
     
     /*
     1. Evaluate Material
@@ -161,8 +161,9 @@ static inline int evaluate_bishops() {
     */
 
     // Material
-    bishop_score += pop_count(board.bitboards[b]) * material_value[b];
-    bishop_score += pop_count(board.bitboards[B]) * material_value[B];
+    int material = 330;
+    bishop_score -= pop_count(board.bitboards[b]) * material;
+    bishop_score += pop_count(board.bitboards[B]) * material;
     
     // Piece Square Tables
     bishop_bb = board.bitboards[b];
@@ -182,9 +183,20 @@ static inline int evaluate_bishops() {
     return bishop_score;
 }
 
-static inline int evaluate_rooks() {
+int evaluate_rooks() {
     int rook_score = 0;
     uint64_t rook_bb;
+    
+    int rook_psqt[64] = {
+         0,  0,  0,  0,  0,  0,  0,  0,
+         5, 10, 10, 10, 10, 10, 10,  5,
+        -5,  0,  0,  0,  0,  0,  0, -5,
+        -5,  0,  0,  0,  0,  0,  0, -5,
+        -5,  0,  0,  0,  0,  0,  0, -5,
+        -5,  0,  0,  0,  0,  0,  0, -5,
+        -5,  0,  0,  0,  0,  0,  0, -5,
+         0,  0,  0,  5,  5,  0,  0,  0
+    };
     
     /*
     1. Evaluate Material
@@ -192,8 +204,9 @@ static inline int evaluate_rooks() {
     */
 
     // Material
-    rook_score += pop_count(board.bitboards[r]) * material_value[r];
-    rook_score += pop_count(board.bitboards[R]) * material_value[R];
+    int material = 500;
+    rook_score -= pop_count(board.bitboards[r]) * material;
+    rook_score += pop_count(board.bitboards[R]) * material;
     
     // Piece Square Tables
     rook_bb = board.bitboards[r];
@@ -213,20 +226,33 @@ static inline int evaluate_rooks() {
     return rook_score;
 }
 
-static inline int evaluate_queens() {
+int evaluate_queens() {
     int queen_score = 0;
     uint64_t queen_bb;
+    
     
     /*
     1. Evaluate Material
     2. Piece Square Tables
     */
-
+   
     // Material
-    queen_score += pop_count(board.bitboards[q]) * material_value[q];
-    queen_score += pop_count(board.bitboards[Q]) * material_value[Q];
-    
+    int material = 900;
+    queen_score -= pop_count(board.bitboards[q]) * material;
+    queen_score += pop_count(board.bitboards[Q]) * material;
+   
     // Piece Square Tables
+    int queen_psqt[64] = {
+       -20,-10,-10, -5, -5,-10,-10,-20,
+       -10,  0,  0,  0,  0,  0,  0,-10,
+       -10,  0,  5,  5,  5,  5,  0,-10,
+        -5,  0,  5,  5,  5,  5,  0, -5,
+         0,  0,  5,  5,  5,  5,  0, -5,
+       -10,  5,  5,  5,  5,  5,  0,-10,
+       -10,  0,  5,  0,  0,  0,  0,-10,
+       -20,-10,-10, -5, -5,-10,-10,-20
+    };
+
     queen_bb = board.bitboards[q];
     while (queen_bb) {
         int sq = ls1b(queen_bb);
@@ -244,18 +270,36 @@ static inline int evaluate_queens() {
     return queen_score;
 }
 
-static inline int evaluate_kings(int is_endgame) {
+int evaluate_kings(int is_endgame) {
     int king_score = 0;
     uint64_t king_bb;
+
+    int king_psqt[2][64] = {
+        {
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -20,-30,-30,-40,-40,-30,-30,-20,
+        -10,-20,-20,-20,-20,-20,-20,-10,
+         20, 20, -5, -5, -5, -5, 20, 20,
+         20, 30, 10,  0,  0, 10, 30, 20
+        },
+        {
+        -50,-40,-30,-20,-20,-30,-40,-50,
+        -30,-20,-10,  0,  0,-10,-20,-30,
+        -30,-10, 20, 30, 30, 20,-10,-30,
+        -30,-10, 30, 40, 40, 30,-10,-30,
+        -30,-10, 30, 40, 40, 30,-10,-30,
+        -30,-10, 20, 30, 30, 20,-10,-30,
+        -30,-30,  0,  0,  0,  0,-30,-30,
+        -50,-30,-30,-30,-30,-30,-30,-50
+        }
+    };
     
     /*
-    1. Evaluate Material
-    2. Piece Square Tables
+    1. Piece Square Tables
     */
-
-    // Material
-    king_score += pop_count(board.bitboards[k]) * material_value[k];
-    king_score += pop_count(board.bitboards[K]) * material_value[K];
     
     // Piece Square Tables
     king_bb = board.bitboards[k];
