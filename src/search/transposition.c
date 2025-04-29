@@ -1,19 +1,19 @@
 #include "../../include/transposition.h"
 #include "../../include/utils.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 TRANSPOSITION_T* transposition_tt = NULL;
-__ssize_t table_size = 0;
+ssize_t table_size = 0;
 
-void initialise_transposition(__ssize_t size) {
+void initialise_transposition(ssize_t size) {
 
     if (transposition_tt)
         return;
 
     // Ensure that size is a power of 2.
-    __ssize_t power = 1;
+    ssize_t power = 1;
     while (power << 1 <= size) power <<= 1;
     size = power;
 

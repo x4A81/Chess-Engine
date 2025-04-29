@@ -16,7 +16,7 @@ volatile int INFINITE = 0;
 int MOVESTOGO = 0;
 int MOVETIME = 0; // what the gui specifies.
 int TIME_FOR_MOVE = 0; // What the engine determines.
-__ssize_t transposition_size = 32LL * 1024 * 1024;
+ssize_t transposition_size = 32LL * 1024 * 1024;
 
 int W_TIME = 0, B_TIME = 0, W_INC = 0, B_INC = 0;
 clock_t start_time;

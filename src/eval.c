@@ -2,7 +2,6 @@
 #include "../include/board.h"
 #include "../include/move.h"
 #include <stdint.h>
-#include <stdio.h>
 
 #define MIDDLE_GAME 0
 #define END_GAME 1

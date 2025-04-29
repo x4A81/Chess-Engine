@@ -20,7 +20,7 @@ void graceful_exit(const char* message, int exit_code) {
     exit(exit_code);
 }
 
-void setup_engine(__ssize_t transposition_size) {
+void setup_engine(ssize_t transposition_size) {
     if (engine_initialised)
         return;
     initialise_sliding_move_tables(0);
@@ -63,9 +63,9 @@ int parse_move(char* move_string) {
         code += 8;
     if (move_string[4] == 'b')
         code += 9;
-    if (move_string[4] == 'R')
+    if (move_string[4] == 'r')
         code += 10;
-    if (move_string[4] == 'Q')
+    if (move_string[4] == 'q')
         code += 11;
     
     if ((board.bitboards[p] | board.bitboards[P]) & (1ULL << from_sq)) {
