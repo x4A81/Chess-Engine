@@ -15,7 +15,7 @@ typedef struct TRANSPOSITION_T {
     int type;
 } TRANSPOSITION_T;
 
-void initialise_transposition(__ssize_t size);
+void initialise_transposition(ssize_t size);
 void cleanup_transposition();
 void clear_transposition();
 TRANSPOSITION_T *probe_transposition(uint64_t key, int depth);
